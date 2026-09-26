@@ -163,7 +163,9 @@ export function CaseCard({
             href={ctaHref}
             target={isExternal ? "_blank" : undefined}
             rel={isExternal ? "noopener noreferrer" : undefined}
-            onClick={onCtaClick}
+            onClick={ctaHref ? onCtaClick : () => setDetailsOpen((v) => !v)}
+            aria-expanded={ctaHref ? undefined : detailsOpen}
+            aria-controls={ctaHref ? undefined : detailsId}
             intensity="subtle"
             magnetic
             magneticMax={8}

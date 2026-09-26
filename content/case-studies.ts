@@ -137,7 +137,8 @@ type CaseStudiesLocaleCopy = {
     articleLabel: string;
   };
   /** Le tre voci di prova sociale in forma di riga breve (§1, item 1-3). */
-  edtechProofRows: { source: string; note: string }[];
+  /** `links`: le testate, ciascuna cliccabile verso l'articolo che la cita. */
+  edtechProofRows: { source: string; note: string; links?: { label: string; href: string }[] }[];
   edtechHighlightBadge: string;
   customTable: { metric: string; site: number; industryAvg: number; unit: "/100" }[];
   customResultIntro: string;
@@ -157,6 +158,31 @@ const customTable = [
   { metric: "Accessibility", site: 90, industryAvg: 75, unit: "/100" as const },
   { metric: "Performance (desktop)", site: 96, industryAvg: 65, unit: "/100" as const },
   { metric: "Performance (mobile)", site: 81, industryAvg: 40, unit: "/100" as const },
+];
+
+/**
+ * Destinazioni reali delle CTA e delle righe di prova sociale (verificate a mano).
+ * Nessun link inventato: dove manca l'URL la riga resta testo.
+ */
+export const CASE_LINKS = {
+  locandaCamilla: "https://www.locandacamilla.com",
+  press: {
+    certaStampa:
+      "https://certastampa.it/cronaca/81270-premio-di-nicola-brillano-gli-studenti-teramani-due-secondi-posti-all-einstein-nel-contest-regionale",
+    notizieDAbruzzo:
+      "https://www.notiziedabruzzo.it/economia-abruzzo/premio-di-nicola-al-via-la-18a-edizione-del-contest-per-studenti-abruzzesi.html",
+    abruzzoPopolare:
+      "https://www.abruzzopopolare.com/2026/06/05/compie-18-anni-il-premio-di-nicola-si-svolgera-al-marino-di-teramo-e-al-liceo-galilei-di-pescara/",
+  },
+  article: "https://youjustmadethelist.github.io/adaptive_test_article/",
+  /** Post LinkedIn di Vincenzo Di Nicola: URL ancora da ricevere. */
+  diNicolaLinkedIn: "" as string,
+} as const;
+
+const pressLinks = [
+  { label: "CertaStampa", href: CASE_LINKS.press.certaStampa },
+  { label: "NotizieDAbruzzo", href: CASE_LINKS.press.notizieDAbruzzo },
+  { label: "Abruzzo Popolare", href: CASE_LINKS.press.abruzzoPopolare },
 ];
 
 export const caseStudiesCopy: CaseStudiesCopy = {
@@ -372,6 +398,7 @@ export const caseStudiesCopy: CaseStudiesCopy = {
       {
         source: "CertaStampa · NotizieDAbruzzo · Abruzzo Popolare",
         note: '"ex partecipante, oggi studente al Politecnico di Milano"',
+        links: pressLinks,
       },
       {
         source: "LinkedIn — Vincenzo Di Nicola",
@@ -380,6 +407,7 @@ export const caseStudiesCopy: CaseStudiesCopy = {
       {
         source: "Articolo tecnico",
         note: '"A different test for every student — and a reason to trust it"',
+        links: [{ label: "Articolo tecnico", href: CASE_LINKS.article }],
       },
     ],
     edtechHighlightBadge: "Sta evolvendo in qualcosa di più grande. Big news coming soon.",
@@ -592,6 +620,7 @@ export const caseStudiesCopy: CaseStudiesCopy = {
       {
         source: "CertaStampa · NotizieDAbruzzo · Abruzzo Popolare",
         note: '"former contestant, now a student at Politecnico di Milano"',
+        links: pressLinks,
       },
       {
         source: "LinkedIn — Vincenzo Di Nicola",
@@ -600,6 +629,7 @@ export const caseStudiesCopy: CaseStudiesCopy = {
       {
         source: "Technical article",
         note: '"A different test for every student — and a reason to trust it"',
+        links: [{ label: "Technical article", href: CASE_LINKS.article }],
       },
     ],
     edtechHighlightBadge: "It's evolving into something bigger. Big news coming soon.",

@@ -21,6 +21,7 @@ import { DataScatter } from "./DataScatter";
 import { VolatilityDial } from "./VolatilityDial";
 import { ComparisonBarChart } from "./ComparisonBarChart";
 import {
+  CASE_LINKS,
   caseStudiesCopy,
   customComparisonRows,
   fintechDialData,
@@ -473,7 +474,25 @@ export function CaseCarousel({ cardIds, activeIndex, onNavigate, reducedMotion }
                 <li key={row.source} className={styles.proofRow}>
                   <span className={styles.proofIndex}>{String(i + 1).padStart(2, "0")}</span>
                   <div>
-                    <p className={styles.proofSource}>{row.source}</p>
+                    <p className={styles.proofSource}>
+                      {row.links?.length
+                        ? row.links.map((l, j) => (
+                            <span key={l.href}>
+                              {j > 0 && <span aria-hidden="true"> · </span>}
+                              <a
+                                href={l.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.proofLink}
+                                data-track={`press:${l.label}`}
+                              >
+                                {l.label}
+                                <span aria-hidden="true" className={styles.proofLinkArrow}>↗</span>
+                              </a>
+                            </span>
+                          ))
+                        : row.source}
+                    </p>
                     <p className={styles.proofNote}>{row.note}</p>
                   </div>
                 </li>
@@ -485,20 +504,28 @@ export function CaseCarousel({ cardIds, activeIndex, onNavigate, reducedMotion }
       case "custom":
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-            <div className={styles.shot}>
+            <a
+              className={styles.shot}
+              href={CASE_LINKS.locandaCamilla}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-track="case:locanda-screenshot"
+              aria-label={locale === "it" ? "Apri locandacamilla.com" : "Open locandacamilla.com"}
+            >
               <Image
-                src="/images/case-studies/locanda-camilla.svg"
+                src="/images/case-studies/locanda-camilla-camere.webp"
                 alt={
                   locale === "it"
-                    ? "Homepage del sito Locanda Camilla, sviluppato su misura con focus su performance e SEO"
-                    : "Homepage of the Locanda Camilla website, custom-built with a performance-and-SEO focus"
+                    ? "Pagina delle camere del sito Locanda Camilla: le undici camere, ognuna con la sua galleria"
+                    : "Rooms page of the Locanda Camilla website: eleven rooms, each with its own gallery"
                 }
-                width={1200}
-                height={675}
+                width={1600}
+                height={900}
+                sizes="(min-width: 1024px) 520px, 88vw"
                 className={styles.shotImg}
               />
               <span className={styles.shotBadge}>{ui.realScreenshot}</span>
-            </div>
+            </a>
             <ComparisonBarChart
               rows={customComparisonRows}
               reducedMotion={reducedMotion}
@@ -547,8 +574,15 @@ export function CaseCarousel({ cardIds, activeIndex, onNavigate, reducedMotion }
   };
 
   /* Nessun href inventato: vedi nota in fondo al file. */
+  /* Destinazioni reali: la stampa per la EdTech, il sito per Locanda Camilla.
+     Data e Fintech non hanno una pagina pubblica (progetti privati): lì la CTA
+     "Come funziona" apre il pannello Dettagli della card stessa. */
   const ctaHrefFor = (id: CaseCardId) =>
-    id === "data" || id === "fintech" ? "#metodo" : undefined;
+    id === "edtech"
+      ? CASE_LINKS.press.certaStampa
+      : id === "custom"
+        ? CASE_LINKS.locandaCamilla
+        : undefined;
 
   const onCtaClick = (href?: string) => (e: ReactMouseEvent) => {
     if (!href?.startsWith("#")) return;

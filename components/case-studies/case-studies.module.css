@@ -783,6 +783,26 @@
   color: var(--text-hi);
 }
 
+.proofLink {
+  color: var(--text-hi);
+  text-decoration: underline;
+  text-decoration-color: var(--line-hi);
+  text-underline-offset: 3px;
+  transition: color var(--dur-base) var(--ease-out), text-decoration-color var(--dur-base) var(--ease-out);
+}
+.proofLink:hover,
+.proofLink:focus-visible {
+  color: var(--aqua-300);
+  text-decoration-color: var(--aqua-400);
+}
+.proofLinkArrow {
+  display: inline-block;
+  margin-left: 2px;
+  font-size: 0.7em;
+  color: var(--aqua-400);
+  transform: translateY(-1px);
+}
+
 .proofNote {
   margin: 2px 0 0;
   font-size: 0.75rem;
@@ -842,16 +862,30 @@
   border-radius: var(--radius-md);
   box-shadow: inset 0 0 0 1px var(--line);
   aspect-ratio: 16 / 9;
-  /* la card non deve crescere in altezza per lo screenshot: è una prova, non
+  /* la card non deve crescere troppo per lo screenshot: è una prova, non
      l'eroe della card (l'eroe è il 100/100) */
-  max-height: 124px;
+  max-height: 168px;
+  display: block;
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+.shot:hover,
+.shot:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--line-hi), var(--glow-xs);
 }
 
 .shotImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 62%;
   display: block;
+  transition: transform 900ms var(--ease-out), filter var(--dur-base) var(--ease-out);
+  filter: saturate(0.92) brightness(0.94);
+}
+.shot:hover .shotImg,
+.shot:focus-visible .shotImg {
+  transform: scale(1.03);
+  filter: saturate(1) brightness(1);
 }
 
 .shotBadge {
