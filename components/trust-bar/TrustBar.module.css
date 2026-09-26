@@ -1,0 +1,657 @@
+/* ============================================================================
+   02 TRUST BAR — "la traiettoria, illuminata da una scia"
+   ----------------------------------------------------------------------------
+   Revisione del proprietario sulla build live:
+     · "Effetto visivo povero: vorrei far partire dalla scritta principale un
+        glow che attraversa questa riga illuminando tappa per tappa e ingrandendo
+        la scritta quando la scia luminosa la raggiunge (~1 secondo)"
+     · "importante fare enhancing dell'effetto visivo della barra (troppo minima
+        e superficiale) e della scia (che ancora non c'è)"
+
+   Conseguenze qui dentro:
+   1. La guida non è più un capello da 1px. È un CONDUTTORE: canale scavato
+      (ombra sotto + specular in alto), corpo con gradiente, alone sfocato che
+      si accende dietro la luce, testa luminosa con coda che decade.
+   2. La striscia è una LINEA TEMPORALE: nodi sulla guida, connettore al nome,
+      ordine cronologico leggibile. Sotto 1024px diventa verticale — un marquee
+      in loop non può raccontare una cronologia (deviazione deliberata dallo
+      spec §3, che prevedeva il marquee mobile per una lista non ordinata).
+   3. Stato SPENTO comunque leggibile (--text-mid su --void), stato ACCESO ad
+      alto contrasto (--text-hi + alone). L'ingrandimento del nome è un
+      `transform: scale`: non sposta un pixel di layout.
+
+   Token: ART-DIRECTION v2 (--aqua-*, --text-*, --line*, --glow-*). Nessun
+   colore hardcoded. Geometria di default = layout VERTICALE (mobile/tablet);
+   il layout orizzontale vive nella media query ≥1024px.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- titolo -- */
+
+.head {
+  position: relative;
+  margin-bottom: 26px; /* == altezza di .spark: la luce copre esattamente il salto */
+}
+
+/* Alone della sorgente: si accende sotto il titolo quando la scia parte. */
+.headingBloom {
+  position: absolute;
+  left: -6%;
+  top: -40%;
+  width: min(520px, 86%);
+  height: 220%;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    ellipse at 22% 50%,
+    rgb(var(--aqua-rgb) / 0.22),
+    rgb(var(--aqua-rgb) / 0.06) 45%,
+    transparent 72%
+  );
+  filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.heading {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  color: var(--text-hi);
+  max-width: 24ch;
+  text-wrap: balance;
+}
+
+/* La mossa editoriale obbligatoria (ART-DIRECTION §2): frase-chiave in
+   Instrument Serif italic aqua. Tipografia e colore arrivano dall'utility
+   globale `.serif-accent`; qui si aggiunge solo la CARICA — il sovra-glow che
+   segna il momento in cui la luce lascia il titolo. */
+.headingAccent {
+  transition: text-shadow 260ms var(--ease-out);
+}
+
+.heading[data-charged="true"] .headingAccent {
+  text-shadow:
+    0 0 26px rgb(var(--aqua-rgb) / 0.5),
+    0 0 60px rgb(var(--aqua-rgb) / 0.22);
+}
+
+/* ----------------------------------------------------------- il conduttore -- */
+
+.railWrap {
+  position: relative;
+}
+
+/* La scintilla che scende dal titolo all'inizio della guida: è il pezzo che
+   rende letterale "far partire dalla scritta principale un glow". */
+.spark {
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  width: 2px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--aqua-rgb) / 0),
+    rgb(var(--aqua-rgb) / 0.85)
+  );
+  box-shadow: 0 0 12px rgb(var(--aqua-rgb) / 0.6);
+  transform-origin: top center;
+  transform: scaleY(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Il canale: corpo del conduttore. `overflow: hidden` tiene dentro tratto
+   acceso, coda e riflesso; la testa vive FUORI, così il suo alone non viene
+   tagliato. */
+.rail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background:
+    linear-gradient(
+      90deg,
+      rgb(var(--text-hi-rgb) / 0.1),
+      rgb(var(--aqua-rgb) / 0.05) 48%,
+      rgb(var(--void-rgb) / 0.9)
+    ),
+    linear-gradient(
+      180deg,
+      rgb(var(--aqua-rgb) / 0) 0%,
+      rgb(var(--aqua-rgb) / 0.2) 5%,
+      rgb(var(--aqua-rgb) / 0.2) 95%,
+      rgb(var(--aqua-rgb) / 0) 100%
+    );
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--aqua-rgb) / 0.06),
+    0 0 0 1px rgb(var(--void-rgb) / 0.8);
+}
+
+/* Tratto già percorso: resta acceso dietro la scia (la guida "ricorda" la luce). */
+.railLit {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--aqua-100), var(--aqua-500));
+  box-shadow: 0 0 14px rgb(var(--aqua-rgb) / 0.55);
+  opacity: 0.92;
+  transform-origin: top center;
+  transform: scaleY(var(--trail-p, 0));
+}
+
+/* Coda: gradiente a lunghezza FISSA ancorato alla testa, quindi decade davvero
+   invece di allungarsi con il percorso. Solo transform, mai width. */
+.tail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 150px;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--aqua-rgb) / 0) 0%,
+    rgb(var(--aqua-rgb) / 0.45) 55%,
+    var(--aqua-100) 100%
+  );
+  opacity: 0;
+  transform: translate3d(0, calc(var(--trail-len, 0px) - 150px), 0);
+}
+
+/* Alone sfocato che accompagna il tratto acceso: è ciò che dà "spessore" alla
+   barra, il difetto n.1 segnalato ("troppo minima e superficiale"). */
+.railBloom {
+  position: absolute;
+  left: -7px;
+  top: 0;
+  bottom: 0;
+  width: 17px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    180deg,
+    rgb(var(--aqua-rgb) / 0.16),
+    rgb(var(--aqua-rgb) / 0.34)
+  );
+  filter: blur(7px);
+  opacity: 0.85;
+  pointer-events: none;
+  transform-origin: top center;
+  transform: scaleY(var(--trail-p, 0));
+}
+
+/* Testa luminosa. Il wrapper porta SOLO il translate guidato da --trail-len
+   (CSS), il core porta opacity/scale (GSAP): due elementi, così il tween non
+   sovrascrive la transform del percorso. */
+.trailHead {
+  position: absolute;
+  left: -3.5px;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  transform: translate3d(0, var(--trail-len, 0px), 0);
+  z-index: 2;
+}
+
+/* `will-change` solo mentre la scia corre, mai a riposo (ART-DIRECTION §7). */
+.railWrap[data-trail="running"] .trailHead,
+.railWrap[data-trail="running"] .tail,
+.railWrap[data-trail="running"] .railLit,
+.railWrap[data-trail="running"] .railBloom {
+  will-change: transform;
+}
+
+.trailHeadCore {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: radial-gradient(
+    circle,
+    var(--aqua-100) 0%,
+    var(--aqua-300) 42%,
+    rgb(var(--aqua-rgb) / 0) 72%
+  );
+  box-shadow:
+    0 0 16px 2px rgb(var(--aqua-rgb) / 0.75),
+    0 0 44px 10px rgb(var(--aqua-rgb) / 0.3);
+  opacity: 0;
+}
+
+/* Riflesso perpetuo: parte solo DOPO la scia, così non le ruba la scena. */
+.sheen {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 26%;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--aqua-rgb) / 0),
+    rgb(var(--text-hi-rgb) / 0.55) 50%,
+    rgb(var(--aqua-rgb) / 0)
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+.railWrap[data-trail="done"] .sheen {
+  animation: rail-sheen 11s var(--ease-inout) 1.2s infinite;
+}
+
+@keyframes rail-sheen {
+  0%,
+  6% {
+    transform: translate3d(0, -120%, 0);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.5;
+  }
+  56% {
+    opacity: 0.5;
+  }
+  64%,
+  100% {
+    transform: translate3d(0, 420%, 0);
+    opacity: 0;
+  }
+}
+
+/* Alone che insegue la tappa sotto il cursore (solo layout orizzontale). */
+.hoverGlow {
+  display: none;
+}
+
+/* ------------------------------------------------------------- le tappe -- */
+
+.stops {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stop {
+  position: relative;
+  padding-left: 30px;
+}
+
+/* Connettore nodo → nome: la tacca che trasforma la fila in una scala graduata. */
+.stop::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 10px;
+  width: 15px;
+  height: 1px;
+  background: var(--line);
+  transition: background-color 380ms var(--ease-out);
+}
+
+.stop[data-lit="true"]::before {
+  background: rgb(var(--aqua-rgb) / 0.5);
+}
+
+/* Nodo sulla guida: una stazione del percorso. Nessuna transform in CSS — è
+   GSAP a scalarlo all'ignizione. */
+.node {
+  position: absolute;
+  left: -3px;
+  top: 5.5px;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-full);
+  background: var(--raised-hi);
+  box-shadow:
+    inset 0 0 0 1px var(--line-hi),
+    0 0 0 3px rgb(var(--void-rgb) / 0.9);
+  transition:
+    background-color 380ms var(--ease-out),
+    box-shadow 380ms var(--ease-out);
+}
+
+.stop[data-lit="true"] .node {
+  background: var(--aqua-200);
+  box-shadow:
+    inset 0 0 0 1px var(--aqua-100),
+    0 0 0 3px rgb(var(--void-rgb) / 0.9),
+    0 0 12px 1px rgb(var(--aqua-rgb) / 0.75),
+    0 0 30px 4px rgb(var(--aqua-rgb) / 0.3);
+}
+
+/* ------------------------------------------------- contenuto di una tappa -- */
+
+.stopInner {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  border-radius: var(--radius-sm);
+  outline-offset: 4px;
+  text-decoration: none;
+}
+
+.stopInner:focus-visible {
+  outline: 2px solid var(--aqua-400);
+}
+
+.index {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-micro);
+  color: var(--text-low);
+  font-variant-numeric: tabular-nums;
+  transition: color 380ms var(--ease-out);
+}
+
+.stop[data-lit="true"] .index {
+  color: var(--aqua-300);
+}
+
+/* Il nome è trattato COME un logo (spec §8): stesso peso ottico, mai testo di
+   pagina. `transform-origin: left` + `display: inline-block` = l'ingrandimento
+   all'ignizione cresce verso destra senza spostare la baseline né il layout. */
+.label {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 3px;
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  font-size: 0.9375rem;
+  line-height: 1.32;
+  letter-spacing: 0.01em;
+  color: var(--text-mid);
+  max-width: 22ch;
+  text-wrap: balance;
+  transform-origin: left center;
+  transition:
+    color 380ms var(--ease-out),
+    text-shadow 380ms var(--ease-out);
+}
+
+.stop[data-lit="true"] .label {
+  color: var(--text-hi);
+  text-shadow: 0 0 24px rgb(var(--aqua-rgb) / 0.28);
+}
+
+.logoImg {
+  display: block;
+  height: 30px;
+  width: auto;
+  transform-origin: left center;
+  filter: grayscale(1) opacity(0.55);
+  transition: filter 380ms var(--ease-out);
+}
+
+.stop[data-lit="true"] .logoImg {
+  filter: grayscale(0) drop-shadow(0 0 14px rgb(var(--aqua-rgb) / 0.28));
+}
+
+/* Hover/focus: sopra lo stato acceso, non al posto suo. */
+.clickable {
+  cursor: pointer;
+}
+
+.static {
+  cursor: default;
+}
+
+.clickable:hover .label,
+.clickable:focus-visible .label,
+.static:hover .label {
+  color: var(--aqua-100);
+}
+
+.clickable:hover .index,
+.clickable:focus-visible .index,
+.static:hover .index {
+  color: var(--aqua-200);
+}
+
+.stop:hover .node,
+.stop:focus-within .node {
+  background: var(--aqua-100);
+  box-shadow:
+    inset 0 0 0 1px var(--aqua-100),
+    0 0 0 3px rgb(var(--void-rgb) / 0.9),
+    0 0 16px 2px rgb(var(--aqua-rgb) / 0.85),
+    0 0 40px 6px rgb(var(--aqua-rgb) / 0.35);
+}
+
+/* Underline solo per i nomi linkati (spec §5): sui loghi immagine l'unica
+   affordance resta il colore pieno. */
+.clickable .label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1px;
+  width: 100%;
+  background: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 220ms var(--ease-out);
+}
+
+.clickable:hover .label::after,
+.clickable:focus-visible .label::after {
+  transform: scaleX(1);
+}
+
+/* ===========================================================================
+   LAYOUT ORIZZONTALE (≥1024px) — la "riga" della nota del proprietario.
+   Cambia l'asse: la guida diventa larga, la scia viaggia in X, i nodi stanno
+   sopra i nomi. La meccanica JS è la stessa, misura solo l'altra coordinata.
+   ========================================================================= */
+
+@media (min-width: 1024px) {
+  .rail {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+    background:
+      linear-gradient(
+        180deg,
+        rgb(var(--text-hi-rgb) / 0.1),
+        rgb(var(--aqua-rgb) / 0.05) 48%,
+        rgb(var(--void-rgb) / 0.9)
+      ),
+      linear-gradient(
+        90deg,
+        rgb(var(--aqua-rgb) / 0) 0%,
+        rgb(var(--aqua-rgb) / 0.2) 3%,
+        rgb(var(--aqua-rgb) / 0.2) 97%,
+        rgb(var(--aqua-rgb) / 0) 100%
+      );
+  }
+
+  .railLit {
+    background: linear-gradient(180deg, var(--aqua-100), var(--aqua-500));
+    transform-origin: left center;
+    transform: scaleX(var(--trail-p, 0));
+  }
+
+  .tail {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: auto;
+    width: 190px;
+    height: auto;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--aqua-rgb) / 0) 0%,
+      rgb(var(--aqua-rgb) / 0.45) 55%,
+      var(--aqua-100) 100%
+    );
+    transform: translate3d(calc(var(--trail-len, 0px) - 190px), 0, 0);
+  }
+
+  .railBloom {
+    left: 0;
+    right: 0;
+    top: -7px;
+    bottom: auto;
+    width: auto;
+    height: 17px;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--aqua-rgb) / 0.16),
+      rgb(var(--aqua-rgb) / 0.34)
+    );
+    transform-origin: left center;
+    transform: scaleX(var(--trail-p, 0));
+  }
+
+  .trailHead {
+    left: -5px;
+    top: -3.5px;
+    transform: translate3d(var(--trail-len, 0px), 0, 0);
+  }
+
+  .sheen {
+    left: 0;
+    right: auto;
+    top: 0;
+    bottom: 0;
+    width: 30%;
+    height: auto;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--aqua-rgb) / 0),
+      rgb(var(--text-hi-rgb) / 0.5) 50%,
+      rgb(var(--aqua-rgb) / 0)
+    );
+  }
+
+  @keyframes rail-sheen {
+    0%,
+    6% {
+      transform: translate3d(-120%, 0, 0);
+      opacity: 0;
+    }
+    14% {
+      opacity: 0.5;
+    }
+    56% {
+      opacity: 0.5;
+    }
+    64%,
+    100% {
+      transform: translate3d(420%, 0, 0);
+      opacity: 0;
+    }
+  }
+
+  /* Alone che insegue la tappa sotto il cursore, lungo la guida. */
+  .hoverGlow {
+    display: block;
+    position: absolute;
+    top: -2px;
+    left: 0;
+    height: 7px;
+    width: var(--rail-w, 80px);
+    border-radius: var(--radius-full);
+    background: rgb(var(--aqua-rgb) / 0.5);
+    filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(var(--rail-x, 0px), 0, 0) scaleX(0.4);
+    transform-origin: left center;
+    transition:
+      transform 420ms var(--ease-out),
+      opacity 260ms var(--ease-out);
+  }
+
+  .railWrap[data-hover="true"] .hoverGlow {
+    opacity: 1;
+    transform: translate3d(var(--rail-x, 0px), 0, 0) scaleX(1);
+  }
+
+  .stops {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-6);
+  }
+
+  .stop {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: 0;
+    padding-top: 30px;
+  }
+
+  .stop::before {
+    left: 1px;
+    top: 7px;
+    width: 1px;
+    height: 15px;
+  }
+
+  .node {
+    left: -3px;
+    top: -3px;
+  }
+
+  .label {
+    max-width: 18ch;
+  }
+}
+
+@media (min-width: 1440px) {
+  .stops {
+    gap: var(--space-8);
+  }
+}
+
+/* ===========================================================================
+   prefers-reduced-motion (spec §6, ART-DIRECTION §7)
+   Nessuna scia, nessun ingrandimento, nessun riflesso: ogni tappa è già nel suo
+   stato finale ACCESO — completa, ad alto contrasto, tutto il contenuto
+   presente. Lo stato acceso è applicato dal hook (data-lit) al primo effetto,
+   quindi non dipende da nessuna animazione.
+   ========================================================================= */
+
+.reduced .spark,
+.reduced .trailHead,
+.reduced .tail,
+.reduced .sheen,
+.reduced .hoverGlow {
+  display: none;
+}
+
+.reduced .headingBloom {
+  opacity: 0.4;
+}
+
+.reduced .railLit,
+.reduced .railBloom {
+  transform: none;
+}
+
+.reduced .label,
+.reduced .index,
+.reduced .node,
+.reduced .logoImg,
+.reduced .stop::before,
+.reduced .label::after,
+.reduced .headingAccent {
+  transition: none;
+}

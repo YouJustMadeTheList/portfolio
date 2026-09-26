@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "progetti": "Progetti",
+    "metodo": "Metodo",
+    "servizi": "Servizi",
+    "about": "Percorso",
+    "contatti": "Contatti",
+    "menuOpen": "Apri il menu",
+    "menuClose": "Chiudi il menu",
+    "menuLabel": "Menu di navigazione"
+  },
+  "footer": {
+    "tagline": "Sistemi su misura, cuciti per chi li usa.",
+    "colSections": "Sezioni",
+    "colConnect": "Contatti",
+    "colLegal": "Legale",
+    "backToTop": "Torna su",
+    "rights": "Tutti i diritti riservati."
+  },
+  "common": {
+    "localeToggleLabel": "Cambia lingua"
+  },
+  "notFound": {
+    "eyebrow": "Errore 404",
+    "title": "Questa pagina non è ⟨mai stata cucita⟩.",
+    "body": "Il filo si interrompe qui. Forse il link era vecchio, forse l'ho spostata io. Il resto del tessuto è intatto.",
+    "cta": "Torna alla home",
+    "secondary": "Oppure scrivimi",
+    "metaTitle": "Pagina non trovata — Davide De Sanctis"
+  }
+}

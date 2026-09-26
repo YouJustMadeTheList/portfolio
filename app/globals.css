@@ -1,0 +1,652 @@
+@import "tailwindcss";
+
+/* ============================================================
+   DESIGN TOKENS v2 — "Liquid Aqua / Deep Void"
+   Fonte di verità: site-architecture/ART-DIRECTION.md §1-§5.
+
+   Questo file è l'UNICO posto in cui vivono i valori. Nessun componente
+   ridefinisce un token: lo consuma da qui (CSS) o da lib/animation/tokens.ts
+   (JS/GSAP/Framer, che è uno specchio 1:1 di questo blocco).
+
+   NOTA PER GLI ALTRI AGENTI: i nomi legacy della v1 (--bg, --accent,
+   --text-primary, --border-subtle, --radius-*, --duration-*, --ease-*, --z-*,
+   --shadow-*) esistono ancora e sono RIMAPPATI sulla nuova palette. Continuano
+   a funzionare, ma il codice nuovo deve usare i nomi v2 (--void, --aqua-400,
+   --text-hi, --line, ...).
+   ============================================================ */
+:root {
+  /* =========================================================
+     1. PALETTE — verde acqua su vuoto (ART-DIRECTION §1)
+     Nero assoluto #000 VIETATO: il fondo ha sempre dominante fredda.
+     ========================================================= */
+
+  /* --- Fondali --- */
+  --void: #03070a; /* il più profondo — fondo pagina */
+  --base: #060c10; /* superfici di sezione */
+  --raised: #0b141a; /* card, pannelli */
+  --raised-hi: #111e25; /* card in hover */
+  --glass: rgba(11, 20, 26, 0.55); /* + backdrop-blur */
+
+  /* --- Verde acqua: l'accento identitario --- */
+  --aqua-100: #dffff8; /* quasi bianco, per testo su accento */
+  --aqua-200: #a8ffee;
+  --aqua-300: #6ff7de;
+  --aqua-400: #3fe9cc; /* ★ ACCENTO PRIMARIO */
+  --aqua-500: #1acfb1;
+  --aqua-600: #0fa88f;
+  --aqua-800: #0a5a4e;
+  --aqua-900: #063730; /* bordi, fill profondi */
+
+  /* Canale RGB grezzo dell'accento — per comporre alpha arbitrarie:
+     rgb(var(--aqua-rgb) / 0.4) invece di hardcodare rgba(63,233,204,...) */
+  --aqua-rgb: 63 233 204;
+  --void-rgb: 3 7 10;
+  --text-hi-rgb: 232 246 242;
+
+  /* --- Profondità cromatica: SOLO nei gradienti di fondo, mai nel testo --- */
+  --abyss: #0a2f3f; /* teal-blu, dà distanza ai glow */
+  --deep: #071a24;
+
+  /* --- Testo: mai bianco puro, sempre con dominante aqua --- */
+  --text-hi: #e8f6f2;
+  --text-mid: #8da6a3;
+  --text-low: #5a6e70;
+
+  /* --- Accento caldo — RAZIONATO: max 2 occorrenze in tutto il sito.
+         Uso consentito: marker "oggi"/in corso sull'elica, badge "in produzione". --- */
+  --ember: #ff7a4d;
+
+  /* --- Bordi --- */
+  --line: rgba(63, 233, 204, 0.12);
+  --line-hi: rgba(63, 233, 204, 0.32);
+
+  /* --- Stati --- */
+  --state-error: #ff6b6b;
+  --state-success: var(--aqua-400);
+  --focus-ring: var(--aqua-400);
+  --overlay-scrim: rgba(3, 7, 10, 0.78);
+
+  /* =========================================================
+     2. TIPOGRAFIA (ART-DIRECTION §2)
+     Le variabili --font-*-<famiglia> sono iniettate da next/font
+     su <body> (lib/fonts.ts). I fallback coprono l'SSR e il no-JS.
+     ========================================================= */
+  --font-display: var(--font-space-grotesk), "Space Grotesk", ui-sans-serif,
+    system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), "Instrument Serif", ui-serif,
+    Georgia, serif;
+  --font-body: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "JetBrains Mono", ui-monospace,
+    SFMono-Regular, Menlo, monospace;
+
+  /* --- Scala fluida v2 --- */
+  --fs-hero: clamp(2.75rem, 1.6rem + 4.4vw, 5.75rem);
+  --fs-h2: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+  --fs-h3: clamp(1.25rem, 1.05rem + 0.8vw, 1.75rem);
+  --fs-lead: clamp(1.05rem, 0.98rem + 0.35vw, 1.3rem);
+  --fs-body: clamp(0.94rem, 0.9rem + 0.18vw, 1.02rem);
+  --fs-micro: 0.75rem; /* mono, uppercase, ls .14em */
+
+  /* line-height / letter-spacing accoppiati alla scala */
+  --lh-hero: 0.94;
+  --ls-hero: -0.035em;
+  --lh-h2: 1.02;
+  --ls-h2: -0.025em;
+  --lh-h3: 1.15;
+  --ls-h3: -0.015em;
+  --lh-lead: 1.55;
+  --lh-body: 1.65;
+  --ls-micro: 0.14em;
+
+  /* misure massime in ch — gli a-capo devono essere intenzionali */
+  --measure-hero: 18ch;
+  --measure-h2: 22ch;
+  --measure-prose: 62ch;
+
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-bold: 700;
+
+  /* =========================================================
+     3. SPAZIATURA — base 4px
+     ========================================================= */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-32: 128px;
+  --space-40: 160px;
+  --space-48: 192px;
+
+  --section-padding-y-mobile: var(--space-24);
+  /* 160px, non 192: due sezioni adiacenti sommano le rispettive padding, quindi
+     ogni confine valeva 384px — su un viewport da 900px erano quasi mezze
+     schermate vuote fra una sezione e l'altra. 320px restano ariosi senza
+     spezzare il ritmo di lettura. */
+  --section-padding-y-desktop: var(--space-40);
+  --container-padding-x-mobile: var(--space-5);
+  --container-padding-x-tablet: var(--space-8);
+  --container-padding-x-desktop: var(--space-10);
+  --container-max-width: 1440px;
+  --container-max: var(--container-max-width);
+
+  /* altezza nav — l'hero deve stargli sotto, mai sotto di lui (ART-DIRECTION §2) */
+  --nav-h: 72px;
+  --hero-safe-top: calc(var(--nav-h) + 4vw);
+
+  /* =========================================================
+     4. RADIUS
+     ========================================================= */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-xl: 32px;
+  --radius-full: 999px;
+
+  /* =========================================================
+     5. PROFONDITÀ E MATERIA (ART-DIRECTION §3)
+     Su nero l'ombra nera non si vede: la profondità si fa CON LA LUCE.
+     ========================================================= */
+
+  /* L4 — superfici in vetro */
+  --surface-glass: linear-gradient(
+    160deg,
+    rgba(17, 30, 37, 0.9),
+    rgba(6, 12, 16, 0.75)
+  );
+  --surface-glass-hi: linear-gradient(
+    160deg,
+    rgba(23, 41, 50, 0.94),
+    rgba(9, 18, 24, 0.82)
+  );
+  --surface-blur: blur(12px);
+
+  /* bordo a gradiente: aqua in alto-sinistra → trasparente in basso-destra */
+  --border-gradient: linear-gradient(
+    145deg,
+    rgba(63, 233, 204, 0.28),
+    rgba(63, 233, 204, 0.04) 46%,
+    rgba(63, 233, 204, 0) 78%
+  );
+  --border-gradient-hi: linear-gradient(
+    145deg,
+    rgba(63, 233, 204, 0.62),
+    rgba(63, 233, 204, 0.14) 50%,
+    rgba(63, 233, 204, 0.02) 85%
+  );
+
+  /* ombre di distanza + specular edge */
+  --shadow-glass: inset 0 1px 0 rgba(223, 255, 248, 0.06),
+    0 24px 60px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(63, 233, 204, 0.06);
+  --shadow-glass-hover: inset 0 1px 0 rgba(223, 255, 248, 0.12),
+    0 36px 80px -24px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(63, 233, 204, 0.16),
+    0 0 60px -22px rgba(63, 233, 204, 0.5);
+  --shadow-float: 0 40px 90px -30px rgba(0, 0, 0, 0.95),
+    0 0 0 1px rgba(63, 233, 204, 0.1);
+
+  /* L5 — glow degli accenti: ogni elemento aqua "emette" */
+  --glow-xs: 0 0 12px -4px rgba(63, 233, 204, 0.4);
+  --glow-sm: 0 0 24px -4px rgba(63, 233, 204, 0.45);
+  --glow-md: 0 0 44px -8px rgba(63, 233, 204, 0.55);
+  --glow-lg: 0 0 90px -16px rgba(63, 233, 204, 0.6);
+  --glow-text: 0 0 28px rgba(63, 233, 204, 0.45);
+  --glow-ember: 0 0 26px -4px rgba(255, 122, 77, 0.55);
+
+  /* L2 — aurore di sezione: radial enormi, sfocati, MAI centrati */
+  --aurora-aqua: radial-gradient(
+    closest-side,
+    rgba(63, 233, 204, 0.16),
+    rgba(63, 233, 204, 0) 72%
+  );
+  --aurora-abyss: radial-gradient(
+    closest-side,
+    rgba(10, 47, 63, 0.55),
+    rgba(10, 47, 63, 0) 72%
+  );
+  --aurora-deep: radial-gradient(
+    closest-side,
+    rgba(6, 55, 48, 0.42),
+    rgba(6, 55, 48, 0) 70%
+  );
+
+  --backdrop-blur-nav: blur(16px);
+  --backdrop-blur-card: blur(12px);
+
+  /* =========================================================
+     6. MOVIMENTO (ART-DIRECTION §4)
+     ========================================================= */
+  --dur-instant: 120ms;
+  --dur-micro: 180ms;
+  --dur-base: 300ms;
+  --dur-slow: 520ms;
+  --dur-reveal: 700ms;
+  --dur-wobble: 1250ms;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* power3.out */
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-wobble: cubic-bezier(0.22, 1.4, 0.36, 1);
+
+  /* =========================================================
+     7. Z-INDEX — la stratificazione a cinque livelli
+     ========================================================= */
+  --z-shader: -2; /* L1  BackgroundShader (fixed) */
+  --z-aurora: -1; /* L2  aurore di sezione (absolute) */
+  --z-base: 0;
+  --z-content: 1;
+  --z-sticky-elements: 10;
+  --z-nav: 100;
+  --z-nav-mobile-overlay: 110;
+  --z-toast: 200;
+  --z-modal-scrim: 300;
+  --z-modal: 310;
+  --z-grain: 9998; /* L3  GrainOverlay (fixed, pointer-events:none) */
+  --z-cursor: 9999; /* CustomCursor */
+
+  /* =========================================================
+     8. ALIAS DI RETROCOMPATIBILITÀ (v1 → v2)
+     NON rimuovere: sei sezioni non ancora migrate li consumano.
+     Rimappati sulla nuova palette, così ereditano il restyle gratis.
+     ========================================================= */
+  --bg: var(--void);
+  --bg-elevated: var(--raised);
+  --bg-elevated-2: var(--raised-hi);
+  --bg-elevated-soft: rgba(11, 20, 26, 0.4);
+  --text-primary: var(--text-hi);
+  --text-secondary: var(--text-mid);
+  --text-tertiary: var(--text-low);
+  --accent: var(--aqua-400);
+  --accent-dim: rgba(63, 233, 204, 0.35);
+  --accent-dim-soft: rgba(63, 233, 204, 0.18);
+  --accent-particle: var(--aqua-300);
+  --accent-hover: var(--aqua-300);
+  --border-subtle: var(--line);
+  --border-strong: var(--line-hi);
+
+  /* scala tipografica v1 → rimappata sulla v2 */
+  --fs-h1: var(--fs-hero);
+  --fs-h4: clamp(1.1rem, 1rem + 0.45vw, 1.3rem);
+  --fs-h5: 1.05rem;
+  --fs-h6: 0.95rem;
+  --fs-body-lg: var(--fs-lead);
+  --fs-body-sm: 0.875rem;
+  --fs-small: 0.8125rem;
+  --lh-tight: var(--lh-hero);
+  --lh-heading: var(--lh-h3);
+  --lh-relaxed: 1.75;
+  --fw-semibold: 500;
+  --ls-tight: var(--ls-h3);
+  --ls-normal: 0;
+  --ls-wide: 0.02em;
+  --ls-eyebrow: var(--ls-micro);
+
+  /* motion v1 */
+  --duration-micro: var(--dur-micro);
+  --duration-base: var(--dur-base);
+  --duration-reveal: var(--dur-reveal);
+  --duration-nav-toggle: 400ms;
+
+  /* elevazione v1 → superfici in vetro v2 */
+  --shadow-card: var(--shadow-glass);
+  --shadow-elevated-hover: var(--shadow-glass-hover);
+  --shadow-nav-scrolled: 0 1px 0 0 var(--line), 0 18px 40px -24px rgba(0, 0, 0, 0.8),
+    0 0 40px -28px rgba(63, 233, 204, 0.5);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  /* --- colori v2 --- */
+  --color-void: var(--void);
+  --color-base: var(--base);
+  --color-raised: var(--raised);
+  --color-raised-hi: var(--raised-hi);
+  --color-abyss: var(--abyss);
+  --color-deep: var(--deep);
+  --color-aqua-100: var(--aqua-100);
+  --color-aqua-200: var(--aqua-200);
+  --color-aqua-300: var(--aqua-300);
+  --color-aqua-400: var(--aqua-400);
+  --color-aqua-500: var(--aqua-500);
+  --color-aqua-600: var(--aqua-600);
+  --color-aqua-800: var(--aqua-800);
+  --color-aqua-900: var(--aqua-900);
+  --color-text-hi: var(--text-hi);
+  --color-text-mid: var(--text-mid);
+  --color-text-low: var(--text-low);
+  --color-ember: var(--ember);
+  --color-line: var(--line);
+  --color-line-hi: var(--line-hi);
+
+  /* --- alias v1 (non rimuovere) --- */
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-elevated-2: var(--bg-elevated-2);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-particle: var(--accent-particle);
+  --color-state-error: var(--state-error);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+
+  --font-display: var(--font-display);
+  --font-serif: var(--font-serif);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-full);
+}
+
+/* ============================================================
+   BASE
+
+   Tutto questo blocco sta dentro `@layer base` — NON è un dettaglio.
+   Le regole non stratificate battono QUALUNQUE `@layer`, comprese le utility
+   di Tailwind: finché `h1,h2,h3,h4 { margin: 0 }` è rimasto fuori dai layer,
+   ha silenziosamente annullato `mt-5`, `mx-auto` e ogni altra utility di
+   margine su OGNI titolo del sito. Effetti visibili: gli H2 di sezione non
+   erano centrati sotto la loro eyebrow (il box `max-width: 22ch` restava
+   incollato a sinistra) e spariva lo spazio fra eyebrow e titolo.
+   Qualunque regola di elemento aggiunta qui va dentro il layer.
+   ============================================================ */
+@layer base {
+* {
+  box-sizing: border-box;
+}
+
+/* Il fondo stratificato vive su <html>, NON su <body>: così il canvas dello
+   shader (position:fixed, z-index:-2) resta visibile. Nell'ordine di pittura
+   CSS i figli a z-index negativo stanno sopra il background dell'elemento
+   radice ma sotto il background di <body>. Se il fondo fosse su body,
+   coprirebbe lo shader. */
+html {
+  scroll-behavior: smooth; /* neutralizzato da .lenis.lenis-smooth quando Lenis è attivo */
+  background-color: var(--void);
+  background-image:
+    radial-gradient(
+      120ch 70ch at 12% -8%,
+      rgba(10, 47, 63, 0.5),
+      rgba(10, 47, 63, 0) 68%
+    ),
+    radial-gradient(
+      90ch 60ch at 96% 32%,
+      rgba(6, 55, 48, 0.42),
+      rgba(6, 55, 48, 0) 66%
+    ),
+    radial-gradient(
+      100ch 60ch at 40% 108%,
+      rgba(7, 26, 36, 0.7),
+      rgba(7, 26, 36, 0) 70%
+    );
+  background-attachment: fixed;
+}
+
+body {
+  margin: 0;
+  background: transparent;
+  color: var(--text-hi);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Il contenuto reale sta sopra shader (z -2) e aurore (z -1). */
+main {
+  position: relative;
+  z-index: var(--z-content);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  text-wrap: balance;
+  margin: 0;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+::selection {
+  background: var(--aqua-400);
+  color: var(--void);
+}
+} /* fine @layer base */
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--void);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--aqua-900);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--void);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--aqua-600);
+}
+
+/* ============================================================
+   UTILITY DI SISTEMA — usabili da qualunque sezione
+   ============================================================ */
+
+.section-padding {
+  padding-top: var(--section-padding-y-mobile);
+  padding-bottom: var(--section-padding-y-mobile);
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .section-padding {
+    padding-top: var(--space-32);
+    padding-bottom: var(--space-32);
+  }
+}
+@media (min-width: 1024px) {
+  .section-padding {
+    padding-top: var(--section-padding-y-desktop);
+    padding-bottom: var(--section-padding-y-desktop);
+  }
+}
+
+/** L4 — superficie in vetro con bordo a gradiente (pseudo-elemento mask). */
+.glass-surface {
+  position: relative;
+  background: var(--surface-glass);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glass);
+  transition:
+    box-shadow var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+}
+.glass-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--border-gradient);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: background var(--dur-base) var(--ease-out);
+}
+.glass-surface:hover {
+  background: var(--surface-glass-hi);
+  box-shadow: var(--shadow-glass-hover);
+}
+.glass-surface:hover::before {
+  background: var(--border-gradient-hi);
+}
+
+/** Enfasi editoriale: la frase-chiave dentro un titolo (ART-DIRECTION §2). */
+.serif-accent {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--aqua-400);
+  letter-spacing: -0.01em;
+  text-shadow: var(--glow-text);
+}
+
+/** Eyebrow mono + trattino aqua da 24px. */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-micro);
+  color: var(--text-low);
+}
+.eyebrow::before {
+  content: "";
+  width: 24px;
+  height: 1px;
+  flex: none;
+  background: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+}
+
+/** L2 — aurora di sezione. Applicare su un figlio absolute, mai centrato. */
+.aurora {
+  position: absolute;
+  pointer-events: none;
+  z-index: var(--z-aurora);
+  filter: blur(40px);
+  opacity: 0.35;
+  background: var(--aurora-abyss);
+}
+
+/** Testo che emette luce aqua. */
+.glow-text {
+  color: var(--aqua-400);
+  text-shadow: var(--glow-text);
+}
+
+/** Contenitore per il reveal per-parola di TextReveal. */
+.reveal-line {
+  overflow: hidden;
+  display: block;
+}
+
+/* ------------------------------------------------------------------
+   TextReveal — stato nascosto di partenza.
+
+   Vive QUI e non in uno `style` inline: GSAP non sostituisce un transform
+   preesistente che non sa scomporre (es. `translate3d(0,110%,0)`), lo tiene
+   come base e ci appende il proprio. Con lo stato inline la tween arrivava a
+   `yPercent: 0` ma il transform di React restava incollato e OGNI titolo del
+   sito finiva invisibile, 110% sotto la sua maschera.
+
+   Il componente passa a `data-tr-state="live"` al mount (useLayoutEffect,
+   prima del paint): la regola smette di applicarsi, GSAP trova un elemento
+   pulito e ne diventa l'unico proprietario.
+
+   `tr-failsafe` è la rete di sicurezza: se il JS non gira o GSAP esplode
+   l'elemento resta `armed` e il testo si rivela comunque da solo.
+   ------------------------------------------------------------------ */
+[data-tr-state="armed"] .tr-word-i {
+  transform: translate3d(0, 110%, 0);
+  animation: tr-failsafe 0.32s var(--ease-out, ease-out) 2.4s forwards;
+}
+
+@keyframes tr-failsafe {
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Lenis — classi applicate da SmoothScroll.tsx sull'<html>. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Cursore custom: il puntatore di sistema sparisce solo su desktop con mouse. */
+@media (pointer: fine) {
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: none !important;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION — versione statica ma completa e leggibile
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  html.has-custom-cursor,
+  html.has-custom-cursor * {
+    cursor: auto !important;
+  }
+  /* Nessuna maschera, nessun reveal: il testo è già al suo posto. */
+  [data-tr-state="armed"] .tr-word-i {
+    transform: none !important;
+    animation: none !important;
+  }
+}

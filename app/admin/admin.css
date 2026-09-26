@@ -1,0 +1,134 @@
+/* Stili del solo pannello admin (caricati unicamente da app/admin/layout.tsx). */
+
+.admin-body {
+  min-height: 100svh;
+  font-size: 14px;
+  line-height: 1.5;
+  /* serie dati validate con lo script del dataviz skill su --raised (#0b141a) */
+  --chart-1: #0fa88f;
+  --chart-1-hi: #3fe9cc;
+  --chart-2: #7b72e6;
+  --chart-grid: rgba(141, 166, 163, 0.12);
+  --chart-axis: rgba(141, 166, 163, 0.28);
+  --good: #3fe9cc;
+  --bad: #ff6b6b;
+}
+
+.admin-card {
+  position: relative;
+  background: linear-gradient(160deg, rgba(17, 30, 37, 0.72), rgba(6, 12, 16, 0.6));
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 1px 0 rgba(223, 255, 248, 0.05), 0 0 0 1px rgba(63, 233, 204, 0.08),
+    0 20px 50px -30px rgba(0, 0, 0, 0.9);
+}
+
+.admin-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-micro);
+  color: var(--text-low);
+}
+
+.admin-bar {
+  transition: filter 160ms var(--ease-out), background-color 160ms var(--ease-out);
+}
+.admin-row:hover .admin-bar,
+.admin-row:focus-visible .admin-bar {
+  background-color: var(--chart-1-hi);
+  filter: drop-shadow(0 0 6px rgba(63, 233, 204, 0.45));
+}
+.admin-row:hover {
+  background: rgba(63, 233, 204, 0.035);
+}
+
+.admin-input {
+  min-height: 44px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: rgba(3, 7, 10, 0.55);
+  padding: 0 14px;
+  color: var(--text-hi);
+  font: inherit;
+  transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+.admin-input:focus {
+  outline: none;
+  border-color: var(--aqua-400);
+  box-shadow: 0 0 0 3px rgba(63, 233, 204, 0.16);
+}
+.admin-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(1) hue-rotate(120deg);
+}
+
+.admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-hi);
+  background: rgba(63, 233, 204, 0.07);
+  color: var(--text-hi);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 180ms var(--ease-out), background-color 180ms var(--ease-out),
+    border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+}
+.admin-btn:hover {
+  background: rgba(63, 233, 204, 0.15);
+  border-color: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .admin-btn:hover {
+    transform: translateY(-1px);
+  }
+}
+.admin-btn[aria-current="true"],
+.admin-btn--primary {
+  background: var(--aqua-400);
+  border-color: var(--aqua-400);
+  color: var(--void);
+}
+.admin-btn--primary:hover,
+.admin-btn[aria-current="true"]:hover {
+  background: var(--aqua-300);
+}
+.admin-btn--ghost {
+  background: transparent;
+  border-color: var(--line);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.admin-table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-low);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.admin-table td {
+  padding: 11px 12px;
+  border-bottom: 1px solid rgba(63, 233, 204, 0.06);
+  vertical-align: top;
+}
+.admin-table tr:last-child td {
+  border-bottom: 0;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

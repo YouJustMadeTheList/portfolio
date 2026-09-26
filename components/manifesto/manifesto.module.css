@@ -1,0 +1,127 @@
+/* ============================================================================
+   03 MANIFESTO — "una frase incisa nel vuoto"
+   ----------------------------------------------------------------------------
+   Struttura, copy e timeline: specs/03-manifesto.md. Livello visivo:
+   ART-DIRECTION v2 (token v2, contrasto grotesque + Instrument Serif italic
+   aqua, glow al posto dell'ombra).
+
+   Regola di sezione: l'accento compare UNA SOLA volta — sulla keyword. Nessun
+   altro elemento qui è aqua se non il filamento d'attacco e i punti separatori
+   dei pilastri, che sono luce di servizio, non enfasi.
+   ========================================================================== */
+
+.block {
+  position: relative;
+}
+
+/* L'attacco: un filamento che emette, non una riga grigia. */
+.rule {
+  width: 64px;
+  height: 2px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    var(--aqua-400),
+    rgb(var(--aqua-rgb) / 0.12)
+  );
+  box-shadow: var(--glow-sm);
+  margin-bottom: clamp(24px, 3.4vw, 40px);
+}
+
+/* Scala: più grande dello spec (3.5rem) ma sotto l'hero (5.75rem). Il manifesto
+   è il momento di maggior peso tipografico della pagina; non compete in scala
+   con l'headline, compete in densità semantica (spec §3). */
+.line {
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 1.05rem + 4.4vw, 4.75rem);
+  font-weight: var(--fw-medium);
+  line-height: 1.12;
+  letter-spacing: -0.022em;
+  color: var(--text-hi);
+  max-width: 20ch;
+  text-wrap: balance;
+  margin: 0;
+}
+
+.word {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* La keyword è in Instrument Serif italic FIN DAL PRIMO FRAME: il font non
+   cambia mai a runtime, quindi l'accensione (color + text-shadow) non provoca
+   reflow. Il colore iniziale è --text-hi: si accende DOPO essere apparsa. */
+.keyword {
+  display: inline-block;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+  letter-spacing: -0.005em;
+  color: var(--text-hi);
+  text-shadow: none;
+  transition: text-shadow 520ms var(--ease-out);
+}
+
+.keyword[data-lit="true"] {
+  text-shadow:
+    0 0 28px rgb(var(--aqua-rgb) / 0.5),
+    0 0 72px rgb(var(--aqua-rgb) / 0.22);
+}
+
+/* Sotto reduced-motion la keyword è già accesa al primo frame: resta il
+   contrasto cromatico, sparisce solo il movimento verso quel colore (spec §6). */
+.keywordStatic {
+  color: var(--aqua-400);
+}
+
+/* ---- Nota a piè di frase: i tre pilastri ---- */
+
+.secondary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.85rem;
+  margin: clamp(28px, 4vw, 48px) 0 0 0;
+  max-width: var(--measure-prose);
+}
+
+.pillarGroup {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.85rem;
+}
+
+.dot {
+  align-self: center;
+  width: 3px;
+  height: 3px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+}
+
+.pillar {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-micro);
+  color: var(--text-mid);
+  transition: color 250ms var(--ease-out);
+}
+
+.pillar:hover {
+  color: var(--aqua-300);
+}
+
+.coda {
+  font-family: var(--font-body);
+  font-size: clamp(0.875rem, 0.8rem + 0.3vw, 1rem);
+  letter-spacing: 0.01em;
+  color: var(--text-low);
+}
+
+/* Senza JS il testo resta completamente leggibile: il reveal è applicato da
+   GSAP, il markup di partenza è già allo stato finale. */

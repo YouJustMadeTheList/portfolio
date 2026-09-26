@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "progetti": "Work",
+    "metodo": "Method",
+    "servizi": "Services",
+    "about": "Trajectory",
+    "contatti": "Contact",
+    "menuOpen": "Open menu",
+    "menuClose": "Close menu",
+    "menuLabel": "Navigation menu"
+  },
+  "footer": {
+    "tagline": "Tailor-made systems, stitched for the people who use them.",
+    "colSections": "Sections",
+    "colConnect": "Contact",
+    "colLegal": "Legal",
+    "backToTop": "Back to top",
+    "rights": "All rights reserved."
+  },
+  "common": {
+    "localeToggleLabel": "Switch language"
+  },
+  "notFound": {
+    "eyebrow": "Error 404",
+    "title": "This page was ⟨never stitched⟩.",
+    "body": "The thread ends here. Maybe the link was old, maybe I moved it. The rest of the fabric is intact.",
+    "cta": "Back to home",
+    "secondary": "Or get in touch",
+    "metaTitle": "Page not found — Davide De Sanctis"
+  }
+}

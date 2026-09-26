@@ -1,0 +1,1241 @@
+/* ============================================================================
+   04 CASE STUDIES — superficie e scena.
+
+   Tutti i valori vengono dai token di app/globals.css (ART-DIRECTION §1-§5):
+   qui non nasce nessun colore, nessuna durata, nessuna curva. Il file esiste
+   perché il carosello ha bisogno di cose che le utility non coprono — maschere
+   di bordo, scena 3D, pannello di disclosure, pannelli-strumento delle viz.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- scena --- */
+
+.frame {
+  position: relative;
+  width: 100%;
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  perspective: 1500px;
+  perspective-origin: 50% 46%;
+  transform-style: preserve-3d;
+  /* il drag orizzontale non deve rubare lo scroll verticale della pagina */
+  touch-action: pan-y;
+  /* le card laterali si dissolvono verso i bordi invece di essere tagliate */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 7%,
+    #000 93%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 7%,
+    #000 93%,
+    transparent 100%
+  );
+}
+
+.stage:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 8px;
+  border-radius: var(--radius-lg);
+}
+
+.slot {
+  /* ART-DIRECTION §6: la card in foreground è min(560px, 88vw). Punto. */
+  --cs-card-w: min(560px, 88vw);
+  /* Stessa aritmetica di carouselStage.computeStageMetrics, in CSS puro: il
+     bordo esterno della card laterale (offset + mezza larghezza rimpicciolita
+     dalla prospettiva) non può uscire dal palco. 0.4167 e 0.3538 sono metà dei
+     fattori di scala prospettica a z = -300 e z = -620 con perspective 1500. */
+  --cs-side-x: min(
+    calc(var(--cs-card-w) * 0.55),
+    max(0px, calc(50vw - 0.4167 * var(--cs-card-w) - 30px))
+  );
+  --cs-back-x: min(
+    calc(var(--cs-card-w) * 0.72),
+    max(0px, calc(50vw - 0.3538 * var(--cs-card-w) - 30px)),
+    calc(var(--cs-side-x) * 1.35)
+  );
+
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--cs-card-w);
+  height: 100%;
+  margin-left: calc(var(--cs-card-w) / -2);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* Posizione di scena del PRIMO frame dipinto — nessun JS coinvolto. Appena
+   idratato, GSAP scrive le stesse trasformazioni inline (misurate sul palco
+   reale) e queste regole smettono di contare. */
+.slot[data-init="0"] {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  z-index: 30;
+}
+
+.slot[data-init="1"] {
+  transform: translate3d(var(--cs-side-x), 0, -300px) rotateY(-26deg);
+  opacity: 0.88;
+  filter: blur(2.5px);
+  z-index: 20;
+}
+
+.slot[data-init="-1"] {
+  transform: translate3d(calc(var(--cs-side-x) * -1), 0, -300px) rotateY(26deg);
+  opacity: 0.88;
+  filter: blur(2.5px);
+  z-index: 20;
+}
+
+.slot[data-init="2"] {
+  transform: translate3d(var(--cs-back-x), 0, -620px) rotateY(-34deg);
+  opacity: 0.16;
+  filter: blur(5px);
+  z-index: 10;
+}
+
+.slot[data-init="-2"] {
+  transform: translate3d(calc(var(--cs-back-x) * -1), 0, -620px) rotateY(34deg);
+  opacity: 0.16;
+  filter: blur(5px);
+  z-index: 10;
+}
+
+.slotForeground {
+  pointer-events: auto;
+}
+
+.slotBack {
+  pointer-events: none;
+}
+
+.dragging {
+  cursor: grabbing;
+}
+
+/* ----------------------------------------------------------------- card --- */
+
+.card {
+  position: relative;
+  isolation: isolate;
+  height: 100%;
+  overflow: hidden;
+  /* Il palco è alto quanto la card più alta: le altre centrano il proprio
+     contenuto invece di lasciare un buco in fondo (era il difetto del mazzo
+     Metodo v1, qui evitato per costruzione). */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  background: var(--surface-glass);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
+  box-shadow: var(--shadow-glass);
+  transition:
+    box-shadow var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease-out);
+}
+
+/* bordo a gradiente mascherato (L4) */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--border-gradient);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: background var(--dur-base) var(--ease-out);
+}
+
+/* velo di luce interno in alto: dà spessore alla lastra */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 140px;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 100% at 18% 0%,
+    rgb(var(--aqua-rgb) / 0.09),
+    rgb(var(--aqua-rgb) / 0) 70%
+  );
+}
+
+.slotForeground .card {
+  background: var(--surface-glass-hi);
+  box-shadow: var(--shadow-glass-hover);
+}
+
+.slotForeground .card::before {
+  background: var(--border-gradient-hi);
+}
+
+/* scurimento delle card arretrate — guidato da GSAP via opacity inline */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  opacity: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(3, 7, 10, 0.72),
+    rgba(3, 7, 10, 0.94)
+  );
+}
+
+.slot[data-init="1"] .scrim,
+.slot[data-init="-1"] .scrim {
+  opacity: 0.52;
+}
+
+.slot[data-init="2"] .scrim,
+.slot[data-init="-2"] .scrim {
+  opacity: 0.76;
+}
+
+.body {
+  position: relative;
+  z-index: 1;
+  flex: none; /* altezza naturale: è ciò che il carosello misura per il palco */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+
+@media (min-width: 560px) {
+  .body {
+    gap: var(--space-5);
+    padding: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .body {
+    padding: var(--space-8);
+  }
+}
+
+/* ----------------------------------------------------------- intestazione - */
+
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.headRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-micro);
+  color: var(--aqua-300);
+  text-shadow: var(--glow-text);
+}
+
+.tag::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+}
+
+.counter {
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--ls-micro);
+  color: var(--text-low);
+  font-variant-numeric: tabular-nums;
+}
+
+.counterActive {
+  color: var(--aqua-400);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  color: var(--text-hi);
+  text-wrap: balance;
+}
+
+/* la firma della card: serif italic aqua, ART-DIRECTION §2 */
+.tagline {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.05rem, 0.96rem + 0.5vw, 1.35rem);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--aqua-400);
+  text-shadow: var(--glow-text);
+}
+
+/* ------------------------------------------------------------ numero-eroe - */
+
+.hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    140deg,
+    rgb(var(--aqua-rgb) / 0.08),
+    rgb(var(--aqua-rgb) / 0.01) 62%
+  );
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--aqua-rgb) / 0.14),
+    var(--glow-xs);
+}
+
+.heroMain {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.heroValue {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: clamp(2rem, 1.3rem + 2.8vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  text-shadow: 0 0 34px rgb(var(--aqua-rgb) / 0.35);
+}
+
+.heroLabel {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-micro);
+  color: var(--aqua-300);
+}
+
+.heroSub {
+  flex: 1 1 12ch;
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-mid);
+}
+
+.heroSubStrong {
+  color: var(--aqua-200);
+}
+
+.heroText {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-hi);
+}
+
+/* --------------------------------------------------------------- blocchi -- */
+
+/* Sfida a sinistra, strumento a destra: è la larghezza della card a decidere.
+   Sotto 560px la card porta solo identità + numero + strumento, e il testo
+   (integrale, non troncato) resta a un tocco nel pannello Dettagli. Meglio una
+   faccia leggibile in tre secondi che una colonna di 13px da 300px di altezza. */
+.split {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 560px) {
+  .split {
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: start;
+  }
+}
+
+@media (max-width: 559px) {
+  .proseCol {
+    display: none;
+  }
+}
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--ls-micro);
+  color: var(--text-low);
+}
+
+.label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--line), transparent);
+}
+
+.points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.point {
+  position: relative;
+  padding-left: 16px;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-mid);
+  text-wrap: pretty;
+}
+
+.point::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.52em;
+  width: 6px;
+  height: 1px;
+  background: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.04em;
+  color: var(--text-mid);
+  background: rgb(var(--aqua-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition:
+    color var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out);
+}
+
+/* ART-DIRECTION §5-A — il "molleggio" all'ingresso del cursore, qui in CSS puro:
+   sono gli STESSI keyframe di Tactile v2 (rotate/scale smorzati, ~620ms), ma su
+   elementi che sono decine per card e non meritano un componente Framer Motion
+   ciascuno. Sotto prefers-reduced-motion globals.css azzera già le animazioni. */
+@keyframes csWobble {
+  /* v3 — respiro lento, non tremito (revisione del cliente). */
+  0%   { transform: rotate(0deg) scale(1); }
+  35%  { transform: rotate(-0.6deg) scale(1.014); }
+  70%  { transform: rotate(0.35deg) scale(1.004); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+.chip:hover {
+  color: var(--aqua-200);
+  box-shadow:
+    inset 0 0 0 1px var(--line-hi),
+    var(--glow-xs);
+  animation: csWobble 1.25s var(--ease-inout);
+}
+
+.point:hover {
+  color: var(--text-hi);
+}
+
+.point:hover::before {
+  width: 12px;
+  box-shadow: var(--glow-sm);
+}
+
+.point::before {
+  transition:
+    width var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out);
+}
+
+.metric:hover {
+  animation: csWobble 1.25s var(--ease-inout);
+}
+
+.metric:hover .metricValue {
+  color: var(--aqua-100);
+}
+
+.proofRow:hover .proofIndex {
+  color: var(--aqua-200);
+  animation: csWobble 1.25s var(--ease-inout);
+}
+
+.proofRow:hover .proofSource {
+  color: var(--aqua-100);
+}
+
+/* chip di stack: stessa forma, lettura più "tecnica" */
+.chipStack {
+  color: var(--aqua-300);
+  background: rgb(var(--aqua-rgb) / 0.09);
+}
+
+.visualCol {
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------- strumento -- */
+
+.instrument {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background:
+    linear-gradient(180deg, rgba(3, 7, 10, 0.72), rgba(6, 12, 16, 0.5));
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* reticolo di fondo: fa leggere il riquadro come un pannello strumento */
+.instrument::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgb(var(--aqua-rgb) / 0.05) 0 1px,
+      transparent 1px 44px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgb(var(--aqua-rgb) / 0.05) 0 1px,
+      transparent 1px 44px
+    );
+}
+
+.instrumentHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.instrumentBody {
+  position: relative;
+}
+
+.caption {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+  color: var(--text-low);
+}
+
+.readout {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+
+/* ------------------------------------------------------------- metriche --- */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+}
+
+/* sulla card stretta il pannello resta lo strumento e basta: le metriche di
+   contorno vivono nel testo integrale del pannello Dettagli */
+@media (max-width: 559px) {
+  .metrics {
+    display: none;
+  }
+}
+
+.metric {
+  min-width: 0;
+}
+
+.metricLabel {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-low);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metricValue {
+  margin: 2px 0 0;
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  color: var(--aqua-200);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* --------------------------------------------------------------- Card B --- */
+
+.dialWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+@media (min-width: 420px) {
+  .dialWrap {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-5);
+  }
+}
+
+.dial {
+  position: relative;
+  flex: none;
+  width: 148px;
+  height: 148px;
+}
+
+.dialCenter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.dialValue {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text-hi);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 30px rgb(var(--aqua-rgb) / 0.45);
+}
+
+.dialCaption {
+  max-width: 11ch;
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  line-height: 1.3;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-low);
+}
+
+.dialSide {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+/* Badge disclaimer a tutta larghezza dello strumento (non più incastrato nella
+   colonna stretta accanto al quadrante, dove spezzava su cinque righe).
+   `balance` garantisce due righe equilibrate quando la larghezza non basta per
+   una sola — mai una riga piena e quattro monche. */
+.disclaimer {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  border-radius: var(--radius-sm);
+  padding: 9px var(--space-3);
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  text-wrap: balance;
+  color: var(--text-mid);
+  background: rgb(var(--aqua-rgb) / 0.04);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+/* Piccolo marcatore luminoso: dà al badge un attacco visivo invece di farlo
+   partire dal bordo del riquadro. */
+.disclaimerMark {
+  flex: none;
+  align-self: center;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+}
+
+/* --------------------------------------------------------------- Card C --- */
+
+.proofList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.proofRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.proofIndex {
+  display: inline-block; /* serve al wobble: le inline non si trasformano */
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  color: var(--aqua-400);
+  padding-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.proofSource {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--text-hi);
+}
+
+.proofNote {
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-mid);
+}
+
+/* Badge ad alto impatto (spec §1, Card C). Acceso in aqua, MAI in --ember:
+   le due occorrenze rationed dell'accento caldo sono già allocate altrove. */
+.badgeHi {
+  display: block;
+  margin-top: var(--space-4);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--aqua-100);
+  background: linear-gradient(
+    140deg,
+    rgb(var(--aqua-rgb) / 0.12),
+    rgb(var(--aqua-rgb) / 0.02)
+  );
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--aqua-rgb) / 0.3),
+    var(--glow-xs);
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+
+.badgeHi:hover {
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--aqua-rgb) / 0.5),
+    var(--glow-sm);
+  animation: csWobble 1.25s var(--ease-inout);
+}
+
+.signal {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 14px;
+}
+
+.signalBar {
+  width: 3px;
+  border-radius: 1px;
+  background: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+  transform-origin: bottom;
+}
+
+/* --------------------------------------------------------------- Card D --- */
+
+.shot {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px var(--line);
+  aspect-ratio: 16 / 9;
+  /* la card non deve crescere in altezza per lo screenshot: è una prova, non
+     l'eroe della card (l'eroe è il 100/100) */
+  max-height: 124px;
+}
+
+.shotImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.shotBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  border-radius: var(--radius-full);
+  padding: 3px 9px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-mid);
+  background: rgba(3, 7, 10, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendSwatch {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rowHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.rowMetric {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  color: var(--text-mid);
+}
+
+.rowValue {
+  font-family: var(--font-mono);
+  font-weight: var(--fw-medium);
+  font-size: 0.75rem;
+  color: var(--aqua-200);
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  position: relative;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: rgba(3, 7, 10, 0.72);
+  box-shadow: inset 0 0 0 1px var(--line);
+  overflow: hidden;
+}
+
+.barIndustry,
+.barSite {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  border-radius: var(--radius-full);
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.barIndustry {
+  background: var(--text-low);
+  opacity: 0.4;
+}
+
+.barSite {
+  background: linear-gradient(90deg, var(--aqua-600), var(--aqua-300));
+  box-shadow: 0 0 14px -2px rgb(var(--aqua-rgb) / 0.75);
+}
+
+/* --------------------------------------------------------------- footer --- */
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--aqua-300);
+  background: none;
+  border: 0;
+  padding: 8px 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cta:hover {
+  color: var(--aqua-200);
+  text-shadow: var(--glow-text);
+}
+
+.ctaArrow {
+  display: inline-block;
+  transition: transform var(--dur-micro) var(--ease-out);
+}
+
+.cta:hover .ctaArrow {
+  transform: translateX(4px);
+}
+
+.detailsToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  border-radius: var(--radius-full);
+  padding: 7px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-mid);
+  background: rgb(var(--aqua-rgb) / 0.05);
+  box-shadow: inset 0 0 0 1px var(--line);
+  cursor: pointer;
+  transition:
+    color var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out);
+}
+
+.detailsToggle:hover {
+  color: var(--aqua-200);
+  box-shadow:
+    inset 0 0 0 1px var(--line-hi),
+    var(--glow-xs);
+}
+
+/* ------------------------------------------------------ disclosure panel -- */
+
+.details {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  border-radius: inherit;
+  background: linear-gradient(
+    160deg,
+    rgba(9, 18, 24, 0.97),
+    rgba(3, 7, 10, 0.98)
+  );
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transform: translateY(2%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
+}
+
+.detailsOpen {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.detailsScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+@media (min-width: 640px) {
+  .detailsScroll {
+    padding: var(--space-8);
+  }
+}
+
+.detailsHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.detailsText {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--text-mid);
+  text-wrap: pretty;
+}
+
+.detailsStrong {
+  color: var(--text-hi);
+}
+
+/* --------------------------------------------------------------- comandi -- */
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 40;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin-top: -23px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 0 0 1px var(--line),
+    var(--shadow-glass);
+  color: var(--aqua-300);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color var(--dur-micro) var(--ease-out),
+    box-shadow var(--dur-micro) var(--ease-out);
+}
+
+.arrow:hover {
+  color: var(--aqua-100);
+  box-shadow:
+    inset 0 0 0 1px var(--line-hi),
+    var(--glow-sm);
+}
+
+@media (min-width: 1024px) {
+  .arrow {
+    display: inline-flex;
+  }
+}
+
+.arrowPrev {
+  left: 0;
+}
+
+.arrowNext {
+  right: 0;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+}
+
+.arrowSmall {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--glass);
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: var(--aqua-300);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .arrowSmall {
+    display: none;
+  }
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dot {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.dot::after {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--text-low);
+  transition:
+    background var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    transform var(--dur-base) var(--ease-spring);
+}
+
+.dot:hover::after {
+  background: var(--aqua-600);
+}
+
+.dotActive::after {
+  background: var(--aqua-400);
+  box-shadow: var(--glow-sm);
+  transform: scale(1.5);
+}
+
+.hint {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-low);
+}
+
+@media (min-width: 640px) {
+  .hint {
+    display: inline;
+  }
+}
+
+/* ------------------------------------------------------- reduced motion --- */
+
+@media (prefers-reduced-motion: reduce) {
+  .details,
+  .chip,
+  .ctaArrow,
+  .dot::after,
+  .arrow {
+    transition: none;
+  }
+}
