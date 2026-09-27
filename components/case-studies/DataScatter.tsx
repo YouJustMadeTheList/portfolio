@@ -1,5 +1,6 @@
 "use client";
 
+import { useNearViewport } from "@/lib/hooks/useNearViewport";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { colors } from "@/lib/animation/tokens";
 import { CountUp } from "@/components/shared/CountUp";
@@ -129,9 +130,13 @@ export function DataScatter({
     if (active) onRevealStart?.();
   }, [active, onRevealStart]);
 
+  // il canvas si prepara (e il suo loop gira) solo quando la sezione è vicina
+  // (margine anche orizzontale: le card del carosello possono stare di lato)
+  const near = useNearViewport(wrapRef, "150% 100%");
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || width <= 0) return;
+    if (!near || !canvas || width <= 0) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -241,7 +246,7 @@ export function DataScatter({
     return () => {
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [width, height, reducedMotion, active, points, links]);
+  }, [near, width, height, reducedMotion, active, points, links]);
 
   return (
     <div className={styles.instrument}>

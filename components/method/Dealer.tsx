@@ -1,5 +1,6 @@
 "use client";
 
+import { useNearViewport } from "@/lib/hooks/useNearViewport";
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -148,10 +149,12 @@ function Particles({
   armRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  // stelle, contorni e scintille si preparano solo quando il mazzo è vicino
+  const near = useNearViewport(ref);
 
   useEffect(() => {
     const canvas = ref.current;
-    if (!canvas) return;
+    if (!near || !canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -352,7 +355,7 @@ function Particles({
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("resize", onResize);
     };
-  }, [reducedMotion, armRef]);
+  }, [near, reducedMotion, armRef]);
 
   return <canvas ref={ref} className="dealer-dust" aria-hidden="true" />;
 }

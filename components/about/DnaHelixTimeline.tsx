@@ -1,5 +1,6 @@
 "use client";
 
+import { useNearViewport } from "@/lib/hooks/useNearViewport";
 import {
   useCallback,
   useEffect,
@@ -385,7 +386,12 @@ export function DnaHelixTimeline({ phases, events, badges, locale, reducedMotion
     setLayout({ rowCenters: centers, height: h });
   }, [rowCount]);
 
+  // misure, geometria e ScrollTrigger solo quando la sezione si avvicina:
+  // al caricamento della pagina l'elica è schermi più in basso
+  const near = useNearViewport(wrapRef);
+
   useIsoLayoutEffect(() => {
+    if (!near) return;
     measure();
     const el = wrapRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
@@ -393,7 +399,7 @@ export function DnaHelixTimeline({ phases, events, badges, locale, reducedMotion
     ro.observe(el);
     rowRefs.current.slice(0, rowCount).forEach((r) => r && ro.observe(r));
     return () => ro.disconnect();
-  }, [measure, rowCount, width, locale]);
+  }, [near, measure, rowCount, width, locale]);
 
   const geo: HelixGeometry | null = useMemo(() => {
     if (!layout || width <= 0) return null;

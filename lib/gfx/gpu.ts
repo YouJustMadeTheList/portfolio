@@ -89,32 +89,48 @@ export function probeGpuAsync(): Promise<GpuProfile> {
       done(probeSync());
       return;
     }
-    try {
-      const url = URL.createObjectURL(new Blob([WORKER_SRC], { type: "text/javascript" }));
-      const worker = new Worker(url);
-      const finish = () => {
-        window.clearTimeout(timer);
-        worker.terminate();
-        URL.revokeObjectURL(url);
-      };
-      const timer = window.setTimeout(() => {
-        finish();
+
+    const startWorker = () => {
+      try {
+        const url = URL.createObjectURL(new Blob([WORKER_SRC], { type: "text/javascript" }));
+        const worker = new Worker(url);
+        const finish = () => {
+          window.clearTimeout(timer);
+          worker.terminate();
+          URL.revokeObjectURL(url);
+        };
+        const timer = window.setTimeout(() => {
+          finish();
+          done(probeSync());
+        }, 5000);
+        worker.onmessage = (e: MessageEvent<{ webgl: boolean; renderer: string }>) => {
+          finish();
+          const d = e.data;
+          if (!d || !d.webgl) done(probeSync());
+          else done({ webgl: true, software: SOFTWARE_RE.test(d.renderer), renderer: d.renderer });
+        };
+        worker.onerror = () => {
+          finish();
+          done(probeSync());
+        };
+        worker.postMessage(0);
+      } catch {
         done(probeSync());
-      }, 5000);
-      worker.onmessage = (e: MessageEvent<{ webgl: boolean; renderer: string }>) => {
-        finish();
-        const d = e.data;
-        if (!d || !d.webgl) done(probeSync());
-        else done({ webgl: true, software: SOFTWARE_RE.test(d.renderer), renderer: d.renderer });
-      };
-      worker.onerror = () => {
-        finish();
-        done(probeSync());
-      };
-      worker.postMessage(0);
-    } catch {
-      done(probeSync());
-    }
+      }
+    };
+
+    // Il processo GPU è lo stesso che compone i fotogrammi della pagina:
+    // svegliarlo durante il caricamento ritarda i primi fotogrammi. Si
+    // aspetta il `load` e un momento d'ozio.
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+    };
+    const later = () => {
+      if (w.requestIdleCallback) w.requestIdleCallback(startWorker, { timeout: 600 });
+      else window.setTimeout(startWorker, 120);
+    };
+    if (document.readyState === "complete") later();
+    else window.addEventListener("load", later, { once: true });
   });
   return pending;
 }
