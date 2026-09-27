@@ -70,6 +70,13 @@ type ContactCopy = {
   errorGeneric: string;
   errorRateLimit: string;
   noJsFallback: string;
+  /** Barra d'azione fissa della variante mobile (ContactActionBar). */
+  actionBar: {
+    label: string;
+    call: string;
+    whatsapp: string;
+    write: string;
+  };
   validation: {
     nameRequired: string;
     nameTooShort: string;
@@ -125,6 +132,12 @@ export const contactCopy: Record<"it" | "en", ContactCopy> = {
     errorGeneric: `Qualcosa non ha funzionato nell'invio. Riprova, oppure scrivimi direttamente a ${contactEmail} — arrivo comunque.`,
     errorRateLimit: `Troppi messaggi in poco tempo. Riprova tra qualche minuto, oppure scrivimi direttamente a ${contactEmail}.`,
     noJsFallback: `Il form richiede JavaScript per funzionare correttamente. Scrivimi direttamente a ${contactEmail} — rispondo entro 24-48h.`,
+    actionBar: {
+      label: "Contatto rapido",
+      call: "Chiama",
+      whatsapp: "WhatsApp",
+      write: "Scrivi",
+    },
     validation: {
       nameRequired: "Inserisci il tuo nome.",
       nameTooShort: "Nome troppo corto.",
@@ -174,6 +187,12 @@ export const contactCopy: Record<"it" | "en", ContactCopy> = {
     errorGeneric: `Something went wrong sending this. Try again, or email me directly at ${contactEmail} — I'll get it either way.`,
     errorRateLimit: `Too many messages in a short time. Try again in a few minutes, or email me directly at ${contactEmail}.`,
     noJsFallback: `This form needs JavaScript to work properly. Email me directly at ${contactEmail} — I reply within 24-48h.`,
+    actionBar: {
+      label: "Quick contact",
+      call: "Call",
+      whatsapp: "WhatsApp",
+      write: "Write",
+    },
     validation: {
       nameRequired: "Enter your name.",
       nameTooShort: "Name is too short.",

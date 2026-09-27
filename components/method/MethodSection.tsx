@@ -8,6 +8,8 @@ import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { PhaseDeck } from "./PhaseDeck";
 import { Dealer } from "./Dealer";
 import { methodCopy } from "@/content/method";
+import { MethodMobile } from "./MethodMobile";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 
 /**
  * 05 METODO — "un mazzo di carte che si sfoglia".
@@ -32,6 +34,10 @@ export function MethodSection() {
     },
     [copy.phases.length],
   );
+  const isMobile = useIsMobileVariant();
+
+  // Variante mobile (telefoni): mazzo dedicato e NESSUN Dealer montato.
+  if (isMobile) return <MethodMobile />;
 
   return (
     <section id="metodo" className="section-padding relative overflow-hidden">

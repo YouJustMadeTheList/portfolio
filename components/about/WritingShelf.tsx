@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useLocale } from "next-intl";
 import { BlockReveal } from "@/components/fx/TextReveal";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
+import { writingCopy } from "./writingCopy";
 import { writingCards, type WritingCard } from "@/content/about";
 
 /* ============================================================================
@@ -66,29 +67,7 @@ import { writingCards, type WritingCard } from "@/content/about";
 
 type Locale = "it" | "en";
 
-const copy = {
-  it: {
-    heading: "Scritti",
-    hint: "Scegli un libro per aprirne la scheda.",
-    discover: "Scopri",
-    close: "Chiudi",
-    pending: "Non ancora online",
-    pendingDetail:
-      "L'articolo non è ancora pubblicato: il collegamento si attiva appena va online.",
-    openBook: "Apri la scheda dell'articolo",
-    newTab: "(si apre in una nuova scheda)",
-  },
-  en: {
-    heading: "Writing",
-    hint: "Pick a book to open its card.",
-    discover: "Discover",
-    close: "Close",
-    pending: "Not online yet",
-    pendingDetail: "This piece isn't published yet — the link goes live as soon as it is.",
-    openBook: "Open the article card",
-    newTab: "(opens in a new tab)",
-  },
-} satisfies Record<Locale, Record<string, string>>;
+const copy = writingCopy;
 
 /* ------------------------------------------------------------------ misure -- */
 
@@ -286,6 +265,7 @@ export function WritingShelf() {
   const pressedRef = useRef(false);
   const retargetRef = useRef<() => void>(() => {});
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- flag di mount per il portal
   useEffect(() => setMounted(true), []);
 
   const openCard = writingCards.find((c) => c.id === openId) ?? null;
@@ -872,3 +852,6 @@ a.shelf-cta:focus-visible { outline: 2px solid rgb(var(--aqua-rgb) / .55); outli
 `;
 
 export default WritingShelf;
+
+/** Etichette condivise con la variante mobile (AboutMobile › WritingStripMobile). */
+export { writingCopy };

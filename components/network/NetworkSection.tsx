@@ -10,25 +10,16 @@ import { SHOW_NETWORK_SECTION } from "@/config/features";
 import { PersonCard } from "./PersonCard";
 import { NetworkScrollRow } from "./NetworkScrollRow";
 import { cn } from "@/lib/utils/cn";
+import { NetworkMobile } from "./NetworkMobile";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 
-const copy = {
-  it: {
-    eyebrow: "Rete",
-    title: "Persone con cui ho avuto la ⟨fortuna di lavorare⟩ o confrontarmi",
-    subtitle: "Solo con il loro consenso esplicito, una alla volta.",
-  },
-  en: {
-    eyebrow: "Network",
-    title: "People I've had the ⟨fortune to work⟩ or think alongside",
-    subtitle: "Only with their explicit consent, one at a time.",
-  },
-} as const;
+import { networkCopy } from "./networkCopy";
 
 /**
  * Sezione 07bis "Rete" — spec: site-architecture/specs/07bis-rete.md.
  *
  * Nessuna prop dall'esterno (montata incondizionatamente come <NetworkSection />
- * da app/[locale]/page.tsx, vedi spec §8): locale e reduced-motion sono letti
+ * da app/[locale]/d|m/page.tsx, vedi spec §8): locale e reduced-motion sono letti
  * internamente, così la responsabilità di apparire/sparire resta SEMPRE interna
  * al componente, basata sui dati (consentObtained per persona), non su un
  * interruttore esterno che qualcuno potrebbe dimenticare di controllare.
@@ -48,6 +39,10 @@ const copy = {
 export function NetworkSection() {
   const locale = useLocale() as "it" | "en";
   const reducedMotion = usePrefersReducedMotion();
+  const isMobile = useIsMobileVariant();
+
+  // Variante mobile (telefoni): striscia swipe dedicata, stesso gating.
+  if (isMobile) return <NetworkMobile />;
 
   if (!SHOW_NETWORK_SECTION) return null;
 
@@ -59,7 +54,7 @@ export function NetworkSection() {
     return null;
   }
 
-  const t = copy[locale];
+  const t = networkCopy[locale];
   const n = visiblePeople.length;
 
   const cards = visiblePeople.map((p, i) => (

@@ -3,38 +3,11 @@
 import { useEffect, type ReactNode } from "react";
 import Lenis from "lenis";
 import { ensureGsapRegistered, gsap, ScrollTrigger } from "@/lib/animation/gsap";
+import { setLenisInstance } from "./scrollTo";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 
-let instance: Lenis | null = null;
-
-/**
- * Accesso all'istanza Lenis viva (null sotto prefers-reduced-motion o prima del mount).
- * Usarla per `getLenis()?.scrollTo("#contatti")` invece di window.scrollTo, così lo
- * scroll programmatico ha la stessa inerzia di quello a rotella.
- */
-export function getLenis(): Lenis | null {
-  return instance;
-}
-
-/** Scroll programmatico che funziona sia con Lenis attivo sia senza (reduced-motion). */
-export function smoothScrollTo(
-  target: string | number | HTMLElement,
-  offset = 0,
-) {
-  const lenis = getLenis();
-  if (lenis) {
-    lenis.scrollTo(target, { offset });
-    return;
-  }
-  if (typeof window === "undefined") return;
-  if (typeof target === "number") {
-    window.scrollTo({ top: target + offset });
-    return;
-  }
-  const el =
-    typeof target === "string" ? document.querySelector(target) : target;
-  el?.scrollIntoView({ block: "start" });
-}
+// Scroll programmatico e registro dell'istanza: in ./scrollTo (senza Lenis/GSAP).
+export { smoothScrollTo, getLenis } from "./scrollTo";
 
 /**
  * ART-DIRECTION §4 — "lo scroll inerziale è il 40% della percezione di qualità".
@@ -67,7 +40,7 @@ export function SmoothScroll({ children }: { children?: ReactNode }) {
       anchors: true,
       autoRaf: false, // il rAF lo guida gsap.ticker, vedi sotto
     });
-    instance = lenis;
+    setLenisInstance(lenis);
 
     const onScroll = () => ScrollTrigger.update();
     lenis.on("scroll", onScroll);
@@ -86,7 +59,7 @@ export function SmoothScroll({ children }: { children?: ReactNode }) {
       gsap.ticker.remove(raf);
       gsap.ticker.lagSmoothing(500, 33);
       lenis.destroy();
-      instance = null;
+      setLenisInstance(null);
     };
   }, [reduced]);
 

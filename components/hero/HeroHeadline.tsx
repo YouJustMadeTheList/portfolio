@@ -95,6 +95,10 @@ type HeroHeadlineProps = {
   reducedMotion: boolean;
   /** Ritardi (s) delle tre righe e del filo (ms) — dalla timeline madre dell'hero. */
   timing: { line1: number; line2: number; line3: number; stitchMs: number };
+  /** "gsap" (default, desktop): reveal per parola via GSAP dopo l'idratazione.
+   *  "css" (mobile): il reveal è un'animazione CSS del chiamante, che parte al
+   *  primo paint senza aspettare il JS; qui si attende solo che finisca. */
+  revealMode?: "gsap" | "css";
 };
 
 type Mode = "rest" | "loose";
@@ -127,7 +131,7 @@ function words(text: string, keyBase: string): ReactNode[] {
 const useIsoLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
-export function HeroHeadline({ copy, reducedMotion, timing }: HeroHeadlineProps) {
+export function HeroHeadline({ copy, reducedMotion, timing, revealMode = "gsap" }: HeroHeadlineProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const h1Ref = useRef<HTMLHeadingElement>(null);
 
@@ -155,6 +159,24 @@ export function HeroHeadline({ copy, reducedMotion, timing }: HeroHeadlineProps)
     revealDoneRef.current = true;
     const h1 = h1Ref.current;
     if (!h1) return;
+    if (revealMode === "css") {
+      // il reveal CSS è già partito (o finito) prima dell'idratazione: il
+      // giocattolo nasce quando le lettere sono ferme
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        setRevealed(true);
+      };
+      const anims = h1.getAnimations?.({ subtree: true }) ?? [];
+      Promise.all(anims.map((a) => a.finished)).then(finish, finish);
+      const t = window.setTimeout(finish, 2600);
+      return () => {
+        done = true;
+        window.clearTimeout(t);
+        revealDoneRef.current = false;
+      };
+    }
     const lines = Array.from(h1.querySelectorAll<HTMLElement>(".hh-line"));
     if (lines.length === 0) {
       setRevealed(true);
@@ -200,7 +222,7 @@ export function HeroHeadline({ copy, reducedMotion, timing }: HeroHeadlineProps)
       setRevealed(true);
       return undefined;
     }
-  }, [reducedMotion, timing.line1, timing.line2, timing.line3]);
+  }, [reducedMotion, timing.line1, timing.line2, timing.line3, revealMode]);
 
   /* ------------------------------------------------------------------------
      2. Il giocattolo: misura, loop, cursore, trascinamento.

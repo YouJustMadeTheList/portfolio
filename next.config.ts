@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
     // app/global-not-found.tsx: 404 per URL senza rotta. Serve perché il root
-    // layout è app/[locale]/layout.tsx (segmento dinamico), vedi quel file.
+    // layout è app/[locale]/d|m/layout.tsx (segmento dinamico), vedi quel file.
     globalNotFound: true,
   },
 };

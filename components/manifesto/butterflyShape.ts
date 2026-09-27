@@ -106,3 +106,24 @@ export function butterflySlots(K: number): Slot[] {
   slots.push({ x: -0.16, y: -0.58, wing: 0 });
   return slots;
 }
+
+/**
+ * Sagoma "lite" per la variante mobile: 18 glifi (4+3 per ala e lato, 2 sul
+ * corpo, 2 antenne). Con due farfalle in volo si resta sotto il tetto di 40
+ * glifi del budget mobile; la lettura "farfalla" la regge la membrana
+ * disegnata sotto, non la densità dei numeri.
+ */
+export function butterflySlotsLite(): Slot[] {
+  const fore = sampleClosed(FOREWING, 6, 0.35).filter((p) => p[0] > 0.16).slice(0, 4);
+  const hind = sampleClosed(HINDWING, 5, 0.55).filter((p) => p[0] > 0.16).slice(0, 3);
+  const slots: Slot[] = [];
+  for (const side of [1, -1]) {
+    for (const [x, y] of fore) slots.push({ x: x * side, y, wing: 1 });
+    for (const [x, y] of hind) slots.push({ x: x * side, y, wing: 1 });
+  }
+  slots.push({ x: 0, y: -0.2, wing: 0 });
+  slots.push({ x: 0, y: 0.3, wing: 0 });
+  slots.push({ x: 0.16, y: -0.58, wing: 0 });
+  slots.push({ x: -0.16, y: -0.58, wing: 0 });
+  return slots;
+}

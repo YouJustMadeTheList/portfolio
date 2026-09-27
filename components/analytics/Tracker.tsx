@@ -7,7 +7,7 @@ import type { TrackEvent, TrackPayload } from "@/lib/analytics/payload";
 import { getIdentity, isExcluded, privacySignal, readConsent } from "@/lib/analytics/consent";
 
 /**
- * Tracker first-party, senza librerie. Montato una volta in app/[locale]/layout.tsx.
+ * Tracker first-party, senza librerie. Montato una volta in app/[locale]/d|m/layout.tsx.
  *
  * Senza consenso: solo pageview + sezioni viste (permanenza), nessun id, niente
  * scritto nel browser. Con consenso: + id visitatore/sessione, click, scroll, durata.

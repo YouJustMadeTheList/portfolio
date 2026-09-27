@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, type ReactNode } from "react";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 import {
   motion,
   useMotionTemplate,
@@ -60,7 +61,10 @@ export function Tilt3D({
    dall'SSR e React buttava via e ri-renderizzava l'intero albero
    (hydration mismatch su tutta la pagina). `usePrefersReducedMotion`
    parte da false e si aggiorna in useEffect: l'idratazione combacia. */
-  const reduced = usePrefersReducedMotion();
+  const isMobileVariant = useIsMobileVariant();
+  // Variante mobile: niente molle, tilt o magnetismo — su touch non c'è hover
+  // e ogni molla è lavoro sul main thread durante lo scroll. Elemento statico.
+  const reduced = usePrefersReducedMotion() || isMobileVariant;
   const ref = useRef<HTMLDivElement>(null);
 
   // px / py normalizzati 0..1 dentro l'elemento

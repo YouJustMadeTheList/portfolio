@@ -8,7 +8,7 @@ import "./globals.css";
 /**
  * Fallback 404 GLOBALE, per gli URL che non corrispondono ad alcuna rotta e
  * non passano dal layout di locale (es. /qualcosa.xyz, escluso dal matcher
- * del middleware). Next 16: il layout radice qui è app/[locale]/layout.tsx,
+ * del middleware). Next 16: il layout radice qui è app/[locale]/d|m/layout.tsx,
  * un segmento dinamico — un app/not-found.tsx non avrebbe un root layout in
  * cui rendersi (next-app-loader fallisce in build e in dev prova a crearne
  * uno). Per questo si usa `global-not-found`, abilitato con

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { Tactile } from "@/components/ui/Tactile";
 import { contactCopy, type ProjectType } from "@/content/contact";
-import { contactSchema } from "@/lib/validation/contact";
+import { contactRules } from "@/lib/validation/contactRules";
 import { ensureGsapRegistered, gsap } from "@/lib/animation/gsap";
 import { SERVICES_HANDOFF_KEY } from "@/content/services";
 import { cn } from "@/lib/utils/cn";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 
 type ContactFormProps = {
   locale: "it" | "en";
@@ -33,6 +34,11 @@ type ContactFormState =
 const FIELD_ORDER: FieldName[] = ["name", "email", "projectType", "message"];
 const FETCH_TIMEOUT_MS = 10_000;
 const MIN_PERCEIVED_LOADING_MS = 500;
+
+/** Orologio per la durata minima percepita del caricamento (usato solo negli handler). */
+function nowMs(): number {
+  return Date.now();
+}
 
 const initialValues: ContactFormValues = {
   name: "",
@@ -64,22 +70,22 @@ function getFieldError(
   switch (field) {
     case "name": {
       if (trimmed.length === 0) return copy.validation.nameRequired;
-      return contactSchema.shape.name.safeParse(value).success
+      return contactRules.name(value)
         ? undefined
         : copy.validation.nameTooShort;
     }
     case "email": {
-      return contactSchema.shape.email.safeParse(value).success
+      return contactRules.email(value)
         ? undefined
         : copy.validation.emailInvalid;
     }
     case "projectType": {
-      return contactSchema.shape.projectType.safeParse(value).success
+      return contactRules.projectType(value)
         ? undefined
         : copy.validation.projectTypeRequired;
     }
     case "message": {
-      if (contactSchema.shape.message.safeParse(value).success) return undefined;
+      if (contactRules.message(value)) return undefined;
       return trimmed.length > 2000 ? copy.validation.messageTooLong : copy.validation.messageTooShort;
     }
     default:
@@ -104,10 +110,13 @@ function getFieldError(
  */
 export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
   const copy = contactCopy[locale];
+  // Variante mobile: campi a 16px (niente zoom automatico di iOS), tastiere e
+  // tasto Invio adatti a ogni campo, contenitore senza blur né altezza minima.
+  const mobile = useIsMobileVariant();
 
   const [values, setValues] = useState<ContactFormValues>(initialValues);
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
-  const [touched, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
+  const [, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
   const [focused, setFocused] = useState<Partial<Record<FieldName, boolean>>>({});
   const [formState, setFormState] = useState<ContactFormState>({ status: "idle" });
 
@@ -174,11 +183,14 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
     }
   }, [formState.status, reducedMotion]);
 
-  function setFieldRef(field: FieldName) {
-    return (el: HTMLElement | null) => {
-      if (el) fieldRefs.current[field] = el;
-    };
-  }
+  // Un solo callback-ref stabile per tutti i campi: l'attributo `name` di
+  // ogni controllo coincide con il suo FieldName.
+  const registerField = useCallback(
+    (el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null) => {
+      if (el) fieldRefs.current[el.name as FieldName] = el;
+    },
+    [],
+  );
 
   function updateValue(field: FieldName, value: string) {
     setValues((prev) => ({ ...prev, [field]: value }));
@@ -244,10 +256,10 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-    const start = Date.now();
+    const start = nowMs();
 
     const waitOutMinDuration = async () => {
-      const elapsed = Date.now() - start;
+      const elapsed = nowMs() - start;
       const remaining = MIN_PERCEIVED_LOADING_MS - elapsed;
       if (remaining > 0) await new Promise((resolve) => setTimeout(resolve, remaining));
     };
@@ -295,6 +307,18 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
     setFormState({ status: "idle" });
   }
 
+  /** Tasto "Avanti" della tastiera (enterkeyhint="next"): passa al campo
+   *  successivo invece di inviare il form a metà compilazione. */
+  function handleEnterNext(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (!mobile || e.key !== "Enter" || e.nativeEvent.isComposing) return;
+    const field = e.currentTarget.name as FieldName;
+    const next = FIELD_ORDER[FIELD_ORDER.indexOf(field) + 1];
+    const el = next ? fieldRefs.current[next] : undefined;
+    if (!el) return;
+    e.preventDefault();
+    el.focus();
+  }
+
   const isSubmitting = formState.status === "submitting";
   const showSuccess = formState.status === "success";
 
@@ -303,13 +327,19 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
   const fieldErrorClass = "border-[var(--state-error)]";
 
   function fieldClass(field: FieldName) {
-    return cn(fieldBaseClass, errors[field] && fieldErrorClass);
+    return cn(fieldBaseClass, mobile && "min-h-[56px] text-[16px]", errors[field] && fieldErrorClass);
   }
 
   const floated = (field: FieldName) => Boolean(focused[field]) || values[field].length > 0;
 
   return (
-    <div className="relative min-h-[560px] rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--raised)]/40 p-6 backdrop-blur-[6px] sm:p-8">
+    <div
+      className={
+        mobile
+          ? "relative rounded-[var(--radius-lg)] border border-[var(--line)] bg-[rgba(11,20,26,0.72)] p-4"
+          : "relative min-h-[560px] rounded-[var(--radius-lg)] border border-[var(--line)] bg-[var(--raised)]/40 p-6 backdrop-blur-[6px] sm:p-8"
+      }
+    >
       {!showSuccess ? (
         <form
           action="/api/contact"
@@ -340,8 +370,8 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
             />
           </div>
 
-          <div ref={fieldsContainerRef} className="contact-form-fields flex flex-col gap-5">
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div ref={fieldsContainerRef} className={cn("contact-form-fields flex flex-col", mobile ? "gap-2.5" : "gap-5")}>
+            <div className={cn("grid grid-cols-1 sm:grid-cols-2", mobile ? "gap-2.5" : "gap-5")}>
               <FloatingField
                 label={copy.fields.name.label}
                 htmlFor="contact-name"
@@ -354,7 +384,10 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
                   name="name"
                   type="text"
                   autoComplete="name"
-                  ref={setFieldRef("name")}
+                  autoCapitalize="words"
+                  enterKeyHint="next"
+                  onKeyDown={handleEnterNext}
+                  ref={registerField}
                   value={values.name}
                   placeholder={focused.name ? copy.fields.name.placeholder : ""}
                   disabled={isSubmitting}
@@ -379,7 +412,13 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
                   name="email"
                   type="email"
                   autoComplete="email"
-                  ref={setFieldRef("email")}
+                  inputMode="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  enterKeyHint="next"
+                  onKeyDown={handleEnterNext}
+                  ref={registerField}
                   value={values.email}
                   placeholder={focused.email ? copy.fields.email.placeholder : ""}
                   disabled={isSubmitting}
@@ -408,7 +447,7 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
               <select
                 id="contact-project-type"
                 name="projectType"
-                ref={setFieldRef("projectType")}
+                ref={registerField}
                 value={values.projectType}
                 disabled={isSubmitting}
                 aria-invalid={Boolean(errors.projectType)}
@@ -448,7 +487,7 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
               <textarea
                 id="contact-message"
                 name="message"
-                ref={setFieldRef("message")}
+                ref={registerField}
                 value={values.message}
                 placeholder={focused.message ? copy.fields.message.placeholder : ""}
                 disabled={isSubmitting}
@@ -457,7 +496,8 @@ export function ContactForm({ locale, reducedMotion }: ContactFormProps) {
                 onChange={(e) => updateValue("message", e.target.value)}
                 onFocus={() => handleFocus("message")}
                 onBlur={() => handleBlur("message")}
-                className={cn(fieldClass("message"), "min-h-[140px] resize-y pt-[26px]")}
+                autoCapitalize="sentences"
+                className={cn(fieldClass("message"), mobile ? "min-h-[128px]" : "min-h-[140px]", "resize-y pt-[26px]")}
               />
             </FloatingField>
 
@@ -648,7 +688,7 @@ function SuccessIcon({ ref }: { ref: React.Ref<SVGSVGElement> }) {
   );
 }
 
-function ErrorMessageWithMailto({ text, locale }: { text: string; locale: "it" | "en" }) {
+function ErrorMessageWithMailto({ text }: { text: string; locale: "it" | "en" }) {
   // Estrae l'indirizzo email dal testo per renderlo un vero <a href="mailto:...">
   // cliccabile inline, non solo menzionato (§7).
   const match = text.match(/[\w.+-]+@[\w-]+\.[\w.-]+/);

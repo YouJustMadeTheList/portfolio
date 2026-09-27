@@ -155,6 +155,23 @@ export function MobileMenuOverlay({
           >
             <LocaleToggle />
           </motion.div>
+
+          {/* L'overlay copre la nav (z superiore), quindi il trigger non è più
+              raggiungibile — una X nello STESSO punto dell'hamburger, per
+              telefoni e tablet. Ultima nel DOM: il focus iniziale resta sulla
+              prima voce, il focus trap la include. */}
+          {(
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t("menuClose")}
+              className="absolute right-[var(--container-padding-x-mobile)] top-[calc((var(--nav-h)-44px)/2)] grid size-11 place-items-center rounded-[var(--radius-sm)] text-[var(--text-hi)] outline-none [-webkit-tap-highlight-color:transparent] active:bg-[rgb(var(--aqua-rgb)/0.1)] focus-visible:[outline:2px_solid_var(--focus-ring)]"
+            >
+              <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+                <path d="M3 3l12 12M15 3L3 15" />
+              </svg>
+            </button>
+          )}
         </motion.div>
       ) : null}
     </AnimatePresence>

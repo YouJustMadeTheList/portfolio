@@ -6,6 +6,7 @@ import { useHomeAnchor } from "./useHomeAnchor";
 import { spring } from "@/lib/animation/tokens";
 import { cn } from "@/lib/utils/cn";
 import type { SectionId } from "@/content/nav";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 
 /**
  * Voce di nav — desktop (pillola con indicatore che SCORRE) e mobile
@@ -36,7 +37,16 @@ export function NavLink({
   large?: boolean;
 }) {
   const { hrefFor, scrollIfHome } = useHomeAnchor();
+  const mobile = useIsMobileVariant();
   const handleClick: React.MouseEventHandler = (e) => {
+    if (mobile && onNavigate) {
+      // Variante mobile, dall'overlay: prima si chiude il menu (e si sblocca lo
+      // scroll della pagina), POI parte lo scroll nativo fluido — uno scroll
+      // avviato mentre <html> è ancora overflow:hidden verrebbe interrotto.
+      onNavigate();
+      scrollIfHome(e, `#${id}`, true);
+      return;
+    }
     // Sulla home: scroll fluido via Lenis. Altrove: navigazione a /{locale}#id.
     scrollIfHome(e, `#${id}`);
     onNavigate?.();

@@ -15,6 +15,8 @@ import { trustItems, trustBarCopy, type Locale } from "@/content/trust-bar";
 import { TrustItemView } from "./TrustItemView";
 import { useLightTrail } from "./useLightTrail";
 import styles from "./TrustBar.module.css";
+import { TrustBarMobile } from "./TrustBarMobile";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 
 /* ============================================================================
    02 TRUST BAR — la traiettoria, percorsa da una scia luminosa
@@ -43,6 +45,13 @@ import styles from "./TrustBar.module.css";
    ========================================================================== */
 
 export function TrustBarSection() {
+  // Telefoni (variante "m", proxy.ts): striscia orizzontale da sfogliare,
+  // vedi TrustBarMobile. Il ramo desktop qui sotto è invariato.
+  const isMobile = useIsMobileVariant();
+  return isMobile ? <TrustBarMobile /> : <TrustBarDesktop />;
+}
+
+function TrustBarDesktop() {
   const locale = useLocale() as Locale;
   const copy = trustBarCopy[locale] ?? trustBarCopy.it;
   const reducedMotion = usePrefersReducedMotion();

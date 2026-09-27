@@ -650,3 +650,25 @@ html.lenis body {
     animation: none !important;
   }
 }
+
+/* ==========================================================================
+   VARIANTE MOBILE — budget di prestazioni (data-variant="m" su <html>, vedi
+   app/[locale]/[variant]/layout.tsx). Il desktop non è toccato da nulla qui.
+   · backdrop-filter è tra gli effetti più costosi per la GPU di un telefono,
+     soprattutto durante lo scroll: superfici semitrasparenti piene al suo posto.
+   · Le aurore sono già gradienti radiali morbidi: il blur(40px) su elementi
+     enormi è puro costo di composizione.
+   ========================================================================== */
+html[data-variant="m"] *,
+html[data-variant="m"] *::before,
+html[data-variant="m"] *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html[data-variant="m"] .glass-surface {
+  background: linear-gradient(160deg, rgba(17, 30, 37, 0.96), rgba(8, 15, 20, 0.94));
+}
+html[data-variant="m"] .aurora {
+  filter: none;
+  opacity: 0.22;
+}

@@ -12,6 +12,7 @@ import { Container } from "@/components/ui/Container";
 import { useHomeAnchor } from "./useHomeAnchor";
 import { useScrollSpy } from "@/lib/hooks/useScrollSpy";
 import { useNavVisibility } from "@/lib/hooks/useNavVisibility";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 
 /**
  * Nav globale v2 (ART-DIRECTION §6 "Nav", spec 00 §B).
@@ -30,6 +31,7 @@ export function Nav() {
   const { hrefFor, scrollIfHome } = useHomeAnchor();
   const active = useScrollSpy(navSections.map((s) => s.id));
   const visible = useNavVisibility();
+  const mobile = useIsMobileVariant();
 
   useEffect(() => {
     let ticking = false;
@@ -52,14 +54,20 @@ export function Nav() {
 
   // Scroll-lock mentre il menu mobile è aperto — evita lo scroll "doppio"
   // (pagina sotto + overlay), spec 00 §B.3.
+  // Variante mobile (scroll nativo, niente Lenis): il blocco va anche su
+  // <html>, altrimenti Safari iOS lascia scorrere la pagina sotto l'overlay.
   useEffect(() => {
     if (!open) return;
+    const html = document.documentElement;
     const prev = document.body.style.overflow;
+    const prevHtml = html.style.overflow;
     document.body.style.overflow = "hidden";
+    if (mobile) html.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
+      if (mobile) html.style.overflow = prevHtml;
     };
-  }, [open]);
+  }, [open, mobile]);
 
   return (
     <>
@@ -72,7 +80,9 @@ export function Nav() {
           aria-hidden="true"
           className="absolute inset-0 -z-10 transition-[background,backdrop-filter] duration-[var(--dur-base)] ease-[var(--ease-out)]"
           style={{
-            background: scrolled || open ? "var(--glass)" : "transparent",
+            // Mobile: niente backdrop-filter (budget GPU), quindi un fondo quasi
+            // opaco al posto del vetro — il testo sotto non deve trasparire.
+            background: scrolled || open ? (mobile ? "rgba(5, 10, 13, 0.94)" : "var(--glass)") : "transparent",
             backdropFilter: scrolled || open ? "var(--backdrop-blur-nav)" : "none",
             WebkitBackdropFilter: scrolled || open ? "var(--backdrop-blur-nav)" : "none",
           }}

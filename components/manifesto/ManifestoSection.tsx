@@ -6,12 +6,23 @@ import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { manifestoCopy, type ManifestoLocale } from "@/content/manifesto";
 import { ManifestoLine } from "./ManifestoLine";
 import { DataButterflies } from "./DataButterflies";
+import { ManifestoMobile } from "./ManifestoMobile";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 
 // 03 MANIFESTO — sezione-cuscinetto tra Trust Bar e Case Studies. Quasi solo
 // tipografia, più la faglia d'aurora con le farfalle di numeri (richiesta del
 // cliente, DataButterflies). Reveal parola-per-parola con "aha" cromatico sulla
 // keyword — vedi specs/03-manifesto.md.
+//
+// Sui telefoni (variante "m", vedi proxy.ts) la sezione è ManifestoMobile:
+// stesso testo, tipografia ricomposta e faglia/farfalle senza WebGL. Il ramo
+// desktop qui sotto è invariato.
 export function ManifestoSection() {
+  const isMobile = useIsMobileVariant();
+  return isMobile ? <ManifestoMobile /> : <ManifestoDesktop />;
+}
+
+function ManifestoDesktop() {
   const locale = useLocale() as ManifestoLocale;
   const reducedMotion = usePrefersReducedMotion();
   const copy = manifestoCopy[locale] ?? manifestoCopy.it;

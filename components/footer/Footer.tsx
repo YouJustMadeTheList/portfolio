@@ -21,6 +21,8 @@ import {
 } from "@/content/footer";
 import { Tactile } from "@/components/ui/Tactile";
 import { cn } from "@/lib/utils/cn";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
+import { useHomeAnchor } from "@/components/nav/useHomeAnchor";
 
 /**
  * Footer v2 — "una vera chiusura, non una striscia sottile" (brief).
@@ -39,6 +41,9 @@ export function Footer() {
   const tNav = useTranslations("nav");
   const locale = useLocale() as "it" | "en";
   const copy = footerCopy[locale];
+  const mobile = useIsMobileVariant();
+
+  if (mobile) return <MobileFooter />;
 
   return (
     // `overflow-clip` e non `overflow-x-clip`: l'aurora sfora di ~180px sotto il
@@ -182,6 +187,156 @@ export function Footer() {
           </div>
         </Container>
       </BlockReveal>
+    </footer>
+  );
+}
+
+/**
+ * Footer della variante MOBILE. Stessi contenuti della desktop, forma da
+ * telefono:
+ *  - il wordmark va su DUE righe ("Davide" / "De Sanctis") con corpo legato
+ *    alla larghezza del viewport: non viene mai tagliato;
+ *  - Sezioni e Contatti affiancati in due colonne compatte, voci alte ≥ 40px;
+ *  - legali + "Preferenze cookie" sempre presenti;
+ *  - spazio in fondo per la ContactActionBar (safe-area inclusa), così non
+ *    copre mai i link legali.
+ * Niente reveal, niente Tactile/magnetismo, niente blur.
+ */
+function MobileFooter() {
+  const t = useTranslations("footer");
+  const tNav = useTranslations("nav");
+  const locale = useLocale() as "it" | "en";
+  const copy = footerCopy[locale];
+  const { hrefFor, scrollIfHome } = useHomeAnchor();
+
+  const linkClass =
+    "inline-flex min-h-10 items-center text-[15px] text-[var(--text-mid)] outline-none active:text-[var(--aqua-300)] focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:outline-offset-2 rounded-[var(--radius-xs)]";
+  const colLabel =
+    "font-[family-name:var(--font-mono)] text-[length:var(--fs-micro)] font-medium uppercase tracking-[var(--ls-micro)] text-[var(--text-low)]";
+  const connect = [
+    { value: linkedinUrl, href: linkedinUrl, label: "LinkedIn", external: true },
+    { value: instagramUrl, href: instagramUrl, label: "Instagram", external: true },
+    { value: phoneHref, href: phoneHref, label: phoneDisplay, external: false },
+    { value: whatsappUrl, href: whatsappUrl, label: "WhatsApp", external: true },
+  ];
+
+  return (
+    <footer
+      className="relative overflow-clip border-t border-[var(--line)] bg-[var(--base)]"
+      style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}
+    >
+      <span
+        aria-hidden="true"
+        className="aurora"
+        style={{
+          top: "-20%",
+          left: "-20%",
+          width: "110vw",
+          height: "50vh",
+          background: "var(--aurora-abyss)",
+          opacity: 0.26,
+        }}
+      />
+      <div className="relative px-5 pt-14">
+        <p
+          className="select-none font-[family-name:var(--font-display)] font-medium leading-[0.95] tracking-[-0.025em] text-[var(--text-hi)]"
+          style={{ fontSize: "min(15vw, 4.5rem)" }}
+        >
+          <span className="block">Davide</span> <span className="block whitespace-nowrap">De Sanctis</span>
+        </p>
+
+        <div className="mt-8">
+          <p className="eyebrow">{copy.eyebrow}</p>
+          <p className="mt-3 text-[17px] leading-[1.45] text-[var(--text-hi)] [text-wrap:pretty]">{copy.ctaText}</p>
+          <p className="mt-1.5 text-[14.5px] text-[var(--text-mid)]">{t("tagline")}</p>
+          {isPlaceholderValue(contactEmail) ? (
+            <p className="mt-2 text-[15px] text-[var(--text-low)]">
+              {copy.emailLabel} · {copy.placeholderNote}
+            </p>
+          ) : (
+            <a href={`mailto:${contactEmail}`} className={cn(linkClass, "mt-1 text-[var(--aqua-300)] [overflow-wrap:anywhere]")}>
+              {contactEmail}
+            </a>
+          )}
+        </div>
+
+        <div className="mt-8 grid grid-cols-2 gap-x-6">
+          <div>
+            <p className={colLabel}>{t("colSections")}</p>
+            <ul className="mt-2 flex list-none flex-col">
+              {navSections.map((s) => (
+                <li key={s.id}>
+                  <a href={hrefFor(s.id)} onClick={(e) => scrollIfHome(e, `#${s.id}`)} className={linkClass}>
+                    {tNav(s.messageKey)}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className={colLabel}>{t("colConnect")}</p>
+            <ul className="mt-2 flex list-none flex-col">
+              {connect.map((c) => (
+                <li key={c.label}>
+                  {isPlaceholderValue(c.value) ? (
+                    <span className={cn(linkClass, "text-[var(--text-low)]")}>{copy.placeholderNote}</span>
+                  ) : (
+                    <a
+                      href={c.href}
+                      target={c.external ? "_blank" : undefined}
+                      rel={c.external ? "noopener noreferrer" : undefined}
+                      className={cn(
+                        linkClass,
+                        c.href === phoneHref && "whitespace-nowrap [font-variant-numeric:tabular-nums]",
+                        c.href === instagramUrl && "flex-col items-start justify-center py-1 leading-tight",
+                      )}
+                    >
+                      {c.label}
+                      {c.href === instagramUrl ? (
+                        <span className="font-[family-name:var(--font-mono)] text-[11px] tracking-[0.02em] text-[var(--text-low)]">
+                          @{instagramHandle}
+                        </span>
+                      ) : null}
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-10 flex items-end justify-between gap-4 border-t border-[var(--line)] pt-6">
+          <div className="flex min-w-0 flex-col gap-2">
+            <nav aria-label={t("colLegal")}>
+              <ul className="-ml-1.5 flex list-none flex-wrap items-center gap-x-2">
+                <li>
+                  <Link href="/privacy" className={cn(legalItemClass, "min-h-10")}>
+                    {copy.legal.privacy}
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/cookie" className={cn(legalItemClass, "min-h-10")}>
+                    {copy.legal.cookie}
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new Event("consent:open"))}
+                    className={cn(legalItemClass, "min-h-10")}
+                  >
+                    {copy.legal.cookiePreferences}
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <p className="text-[length:var(--fs-micro)] text-[var(--text-low)]">
+              © {new Date().getFullYear()} Davide De Sanctis. {t("rights")}
+            </p>
+          </div>
+          <BackToTopButton />
+        </div>
+      </div>
     </footer>
   );
 }

@@ -27,5 +27,8 @@
     "cta": "Back to home",
     "secondary": "Or get in touch",
     "metaTitle": "Page not found — Davide De Sanctis"
+  },
+  "consent": {
+    "shortBody": "Visits counted anonymously; with your OK, a random id too. No ads."
   }
 }

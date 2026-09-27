@@ -2,11 +2,11 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { NotFoundView } from "@/components/not-found/NotFoundView";
 
 /**
- * 404 del sito, resa dentro app/[locale]/layout.tsx (nav + footer inclusi).
+ * 404 del sito, resa dentro il layout della variante (app/[locale]/d|m/layout.tsx) (nav + footer inclusi).
  * La raggiungono: il catch-all app/[locale]/[...rest] per i percorsi
  * inesistenti, e ogni notFound() lanciato sotto /{locale}.
  */
-export default async function LocaleNotFound() {
+export async function LocaleNotFound() {
   const locale = await getLocale();
   const t = await getTranslations("notFound");
 

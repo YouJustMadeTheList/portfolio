@@ -1,0 +1,292 @@
+/* ============================================================================
+   02 TRUST BAR · MOBILE — la traiettoria come striscia da sfogliare
+   ----------------------------------------------------------------------------
+   La colonna verticale della desktop compressa (~7 tappe impilate, tanto
+   vuoto) diventa una STRISCIA ORIZZONTALE nativa: scroll-snap, inerzia del
+   sistema, la tappa successiva che sbircia dal bordo, e sotto una guida che
+   si accende man mano che si sfoglia (la scia della desktop, in versione
+   economica: un solo scaleX + un translate, scritti in rAF da uno scroll
+   listener passivo). Tutto in ~1/2 schermo.
+   Solo transform/opacity animati; nessun filtro, nessun blur.
+   ========================================================================== */
+
+.section {
+  position: relative;
+  overflow: hidden;
+  padding: 48px 0 44px;
+}
+
+.heading {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 22px;
+  font-family: var(--font-display);
+  font-weight: var(--fw-medium);
+  font-size: clamp(1.375rem, 1.1rem + 1.4vw, 1.625rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  color: var(--text-hi);
+  max-width: 20ch;
+  text-wrap: balance;
+}
+
+/* ------------------------------------------------------------ lo scroller -- */
+
+.scroller {
+  position: relative;
+  z-index: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--container-padding-x-mobile, 20px);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  outline-offset: -2px;
+}
+
+.scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.scroller:focus-visible {
+  outline: 2px solid var(--aqua-400);
+}
+
+.track {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  margin: 0;
+  padding: 0 var(--container-padding-x-mobile, 20px) 4px;
+  list-style: none;
+}
+
+/* Il filo della cronologia, sotto i nodi: corre per tutta la striscia. */
+.track::before {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: var(--container-padding-x-mobile, 20px);
+  right: var(--container-padding-x-mobile, 20px);
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--aqua-rgb) / 0.35),
+    rgb(var(--aqua-rgb) / 0.14) 60%,
+    rgb(var(--aqua-rgb) / 0.04)
+  );
+}
+
+.stop {
+  position: relative;
+  flex: none;
+  width: min(66vw, 264px);
+  padding-top: 20px;
+  scroll-snap-align: start;
+}
+
+/* Nodo sul filo. L'accensione è l'opacità di un alone sovrapposto (::after),
+   non un'animazione di box-shadow. */
+.node {
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--raised-hi);
+  box-shadow:
+    inset 0 0 0 1px var(--line-hi),
+    0 0 0 3px rgb(var(--void-rgb) / 0.9);
+}
+
+.node::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--aqua-200);
+  box-shadow:
+    0 0 10px 1px rgb(var(--aqua-rgb) / 0.75),
+    0 0 26px 4px rgb(var(--aqua-rgb) / 0.28);
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 420ms var(--ease-out),
+    transform 520ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 104px;
+  height: 100%;
+  padding: 13px 14px 14px;
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgb(17 30 37 / 0.72), rgb(8 15 20 / 0.6));
+  box-shadow: inset 0 0 0 1px var(--line);
+  color: inherit;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Bordo acceso: overlay a opacità, non una transizione di box-shadow. */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgb(var(--aqua-rgb) / 0.32),
+    inset 0 18px 30px -24px rgb(var(--aqua-rgb) / 0.45);
+  opacity: 0;
+  transition: opacity 520ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+  pointer-events: none;
+}
+
+a.card:active {
+  transform: scale(0.985);
+}
+
+a.card:focus-visible {
+  outline: 2px solid var(--aqua-400);
+  outline-offset: 2px;
+}
+
+.meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-low);
+  font-variant-numeric: tabular-nums;
+}
+
+.index {
+  color: var(--text-mid);
+  transition: color 420ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+}
+
+.label {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.0625rem;
+  line-height: 1.28;
+  letter-spacing: 0.005em;
+  color: var(--text-mid);
+  text-wrap: balance;
+  transition: color 420ms var(--ease-out);
+  transition-delay: var(--d, 0ms);
+}
+
+.logoImg {
+  display: block;
+  height: 28px;
+  width: auto;
+  opacity: 0.6;
+  transition: opacity 420ms var(--ease-out);
+}
+
+.ext {
+  margin-top: auto;
+  align-self: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  color: var(--aqua-400);
+  opacity: 0.7;
+}
+
+/* ---------------------------------------------------------- stato acceso -- */
+
+.stop[data-lit="true"] .node::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.stop[data-lit="true"] .card::before {
+  opacity: 1;
+}
+
+.stop[data-lit="true"] .label {
+  color: var(--text-hi);
+}
+
+.stop[data-lit="true"] .index {
+  color: var(--aqua-300);
+}
+
+.stop[data-lit="true"] .logoImg {
+  opacity: 1;
+}
+
+/* -------------------------------------------------- la guida di progresso -- */
+
+.progress {
+  position: relative;
+  z-index: 1;
+  margin: 18px var(--container-padding-x-mobile, 20px) 0;
+  height: 2px;
+  border-radius: 999px;
+  background: rgb(var(--aqua-rgb) / 0.1);
+}
+
+.fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--aqua-500), var(--aqua-100));
+  box-shadow: 0 0 10px rgb(var(--aqua-rgb) / 0.5);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+.head {
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--aqua-100), var(--aqua-300) 45%, rgb(var(--aqua-rgb) / 0) 75%);
+  box-shadow: 0 0 12px 2px rgb(var(--aqua-rgb) / 0.6);
+  transform: translate3d(0, 0, 0);
+  opacity: 0;
+}
+
+/* Intro: la scia parte da zero e raggiunge le tappe visibili (~0.9s). Dopo,
+   la guida segue il dito senza transizioni. */
+.progress[data-intro="true"] .fill,
+.progress[data-intro="true"] .head {
+  transition:
+    transform 900ms var(--ease-out),
+    opacity 300ms var(--ease-out);
+}
+
+.progress[data-on="true"] .head {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------- reduced motion -- */
+
+.reduced .node::after,
+.reduced .card::before,
+.reduced .label,
+.reduced .index,
+.reduced .logoImg,
+.reduced .fill,
+.reduced .head {
+  transition: none !important;
+}

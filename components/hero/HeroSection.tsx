@@ -4,12 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useLocale } from "next-intl";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
-import { smoothScrollTo } from "@/components/fx/SmoothScroll";
+import { smoothScrollTo } from "@/components/fx/scrollTo";
 import { HeroContent } from "./HeroContent";
 import { ScrollCue } from "./ScrollCue";
 import { SceneCanvasFallback } from "./SceneCanvasFallback";
 import type { SceneQuality } from "./Scene3D";
 import { heroCopy, type Locale } from "@/content/hero";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
+import { HeroMobile } from "./HeroMobile";
 
 // Caricata solo lato client, con un fallback leggerissimo: il testo dell'hero è
 // leggibile e interattivo prima che la scena esista (spec §7 "Bundle/preloader",
@@ -90,7 +92,15 @@ type Capability = { webgl: boolean; quality: SceneQuality };
      flusso, che tiene il posto alla composizione. Il canvas resta fisso anche
      dopo: sfuma con lo scroll e smette di disegnare quando l'hero esce.
    ========================================================================== */
+/**
+ * Variante mobile (telefoni, servita da proxy.ts): hero dedicato, leggero —
+ * vedi HeroMobile.tsx. La desktop (e i tablet) restano esattamente com'erano.
+ */
 export function HeroSection() {
+  return useIsMobileVariant() ? <HeroMobile /> : <HeroDesktop />;
+}
+
+function HeroDesktop() {
   const locale = useLocale() as Locale;
   const copy = heroCopy[locale];
   const reducedMotion = usePrefersReducedMotion();

@@ -110,6 +110,179 @@ export function DirectChannels({ locale }: DirectChannelsProps) {
   );
 }
 
+/**
+ * Variante MOBILE di "Oppure, più diretto": stesso contenuto, forma da
+ * telefono. Un elenco di righe grandi (≥ 56px, a tutta larghezza) invece della
+ * card con tilt 3D: nessun Tactile, nessun translateZ, nessun blur — solo
+ * feedback al tocco. Le righe placeholder restano note inerti.
+ */
+export function MobileChannels({ locale }: DirectChannelsProps) {
+  const copy = contactCopy[locale];
+
+  const rows: {
+    key: string;
+    value: string;
+    href: string;
+    label: string;
+    sublabel: string;
+    mono?: boolean;
+    external?: boolean;
+    icon: ReactNode;
+  }[] = [
+    {
+      key: "email",
+      value: contactEmail,
+      href: `mailto:${contactEmail}`,
+      label: copy.channelEmailLabel,
+      sublabel: contactEmail,
+      icon: (
+        <>
+          <path d="M4 6h16v12H4z" />
+          <path d="m4 7 8 6 8-6" />
+        </>
+      ),
+    },
+    {
+      key: "phone",
+      value: phoneHref,
+      href: phoneHref,
+      label: copy.channelPhoneLabel,
+      sublabel: phoneDisplay,
+      mono: true,
+      icon: (
+        <path d="M6.6 3.5h2.6l1.4 4-2 1.3a11 11 0 0 0 6.6 6.6l1.3-2 4 1.4v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z" />
+      ),
+    },
+    {
+      key: "whatsapp",
+      value: whatsappUrl,
+      href: whatsappUrl,
+      label: copy.channelWhatsappLabel,
+      sublabel: phoneDisplay,
+      mono: true,
+      external: true,
+      icon: (
+        <>
+          <path d="M4 20l1.3-3.9A8 8 0 1 1 8 18.8Z" />
+          <path d="M9.2 9.1c.2 1.9 1.8 3.6 3.7 3.8l1-1 1.6.7-.2 1.2a1.2 1.2 0 0 1-1.3.9 6.4 6.4 0 0 1-5.8-5.8 1.2 1.2 0 0 1 .9-1.3l1.2-.2.7 1.6Z" />
+        </>
+      ),
+    },
+    {
+      key: "booking",
+      value: bookingUrl,
+      href: bookingUrl,
+      label: copy.channelBookingLabel,
+      sublabel: copy.channelBookingSubtext,
+      external: true,
+      icon: (
+        <>
+          <rect x="4" y="5" width="16" height="15" rx="2" />
+          <path d="M4 10h16M8 3v4M16 3v4" />
+          <path d="M12 13v3l2 1" />
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex flex-col gap-4">
+      <h3 className="font-[family-name:var(--font-display)] text-[1.25rem] font-medium leading-[1.2] text-[var(--text-hi)]">
+        {copy.channelsTitle}
+      </h3>
+
+      <ul className="flex list-none flex-col overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-[rgba(11,20,26,0.72)]">
+        {rows.map((row) => {
+          const placeholder = isPlaceholderValue(row.value);
+          const inner = (
+            <>
+              <ChannelIcon>{row.icon}</ChannelIcon>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span
+                  className={cn(
+                    "font-[family-name:var(--font-display)] text-[15.5px] font-semibold",
+                    placeholder ? "text-[var(--text-low)]" : "text-[var(--text-hi)]",
+                  )}
+                >
+                  {row.label}
+                </span>
+                <span
+                  className={cn(
+                    "text-[13px] leading-[1.45] text-[var(--text-mid)] [overflow-wrap:anywhere]",
+                    row.mono && !placeholder
+                      ? "font-[family-name:var(--font-mono)] [font-variant-numeric:tabular-nums]"
+                      : "font-[family-name:var(--font-body)]",
+                  )}
+                >
+                  {placeholder ? `${copy.placeholderNote} · ${row.sublabel}` : row.sublabel}
+                </span>
+              </span>
+              {placeholder ? null : (
+                <span aria-hidden="true" className="shrink-0 text-[14px] text-[var(--aqua-400)]">
+                  {row.external ? "↗" : "→"}
+                </span>
+              )}
+            </>
+          );
+          const rowClass =
+            "flex min-h-[60px] items-center gap-3.5 px-4 py-3 [-webkit-tap-highlight-color:transparent]";
+          return (
+            <li key={row.key} className="border-b border-[var(--line)] last:border-b-0">
+              {placeholder ? (
+                <div aria-disabled="true" className={cn(rowClass, "cursor-default")}>
+                  {inner}
+                </div>
+              ) : (
+                <a
+                  href={row.href}
+                  target={row.external ? "_blank" : undefined}
+                  rel={row.external ? "noopener noreferrer" : undefined}
+                  className={cn(
+                    rowClass,
+                    "outline-none transition-colors duration-150 active:bg-[rgb(var(--aqua-rgb)/0.08)]",
+                    "focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:-outline-offset-2",
+                  )}
+                >
+                  {inner}
+                </a>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="mr-1 font-[family-name:var(--font-mono)] text-[10.5px] uppercase tracking-[var(--ls-micro)] text-[var(--text-low)]">
+          {copy.channelSocialLabel}
+        </p>
+        {[
+          { href: linkedinUrl, label: "LinkedIn" },
+          { href: instagramUrl, label: `@${instagramHandle}` },
+        ]
+          .filter((l) => !isPlaceholderValue(l.href))
+          .map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-[var(--radius-full)] border border-[var(--line)] bg-[rgba(11,20,26,0.6)] px-3.5 text-[13.5px] font-medium text-[var(--text-hi)] outline-none active:border-[var(--line-hi)] focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:outline-offset-2"
+            >
+              {l.label}
+              <span aria-hidden="true" className="text-[11px] text-[var(--aqua-400)]">
+                ↗
+              </span>
+            </a>
+          ))}
+      </div>
+
+      <p className="border-l-2 border-[var(--accent-dim)] py-1 pl-3.5 text-[13px] leading-[1.5] text-[var(--text-mid)]">
+        {copy.trustRecall}
+      </p>
+    </div>
+  );
+}
+
 /** Pillola in vetro per un canale secondario (WhatsApp, social). Cliccabile:
     risposta calma + magnetica, nessun wobble (§5.1). */
 function ChannelPill({ href, label }: { href: string; label: string }) {

@@ -13,7 +13,7 @@ import {
 import { useLocale } from "next-intl";
 import { gsap } from "@/lib/animation/gsap";
 import { useInViewport } from "@/lib/hooks/useInViewport";
-import { smoothScrollTo } from "@/components/fx/SmoothScroll";
+import { smoothScrollTo } from "@/components/fx/scrollTo";
 import { Tactile } from "@/components/ui/Tactile";
 import { cn } from "@/lib/utils/cn";
 import { CaseCard, type CaseDetailBlock, type CasePosition } from "./CaseCard";

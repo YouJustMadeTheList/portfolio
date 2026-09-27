@@ -48,6 +48,8 @@ export type HeroCopy = {
   /** Didascalia sotto al grafo: cosa rappresenta la forma. */
   pillarsCaption: string;
   pillarsCredit: string;
+  /** Solo mobile: invito a toccare un nodo della nebulosa. */
+  pillarsTapHint: string;
   /** Label accessibile del pulsante "scorri" (non visibile). */
   scrollHintAria: string;
 
@@ -90,6 +92,7 @@ export const heroCopy: Record<Locale, HeroCopy> = {
     scrollHint: "Scorri",
     pillarsCaption: "I Pilastri della Creazione — ridisegnati come rete di dati",
     pillarsCredit: "M16, JWST — NASA/ESA/CSA",
+    pillarsTapHint: "Tocca un nodo per espanderlo",
     scrollHintAria: "Scorri alla sezione successiva",
     playSmash: "Sfascia la frase",
     playSmashAgain: "Sfascia ancora",
@@ -123,6 +126,7 @@ export const heroCopy: Record<Locale, HeroCopy> = {
     scrollHint: "Scroll",
     pillarsCaption: "The Pillars of Creation — redrawn as a network of data",
     pillarsCredit: "M16, JWST — NASA/ESA/CSA",
+    pillarsTapHint: "Tap a node to expand it",
     scrollHintAria: "Scroll to the next section",
     playSmash: "Smash the sentence",
     playSmashAgain: "Smash it again",

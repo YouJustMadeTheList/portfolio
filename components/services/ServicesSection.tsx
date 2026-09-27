@@ -4,16 +4,9 @@ import { useLocale } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { BlockReveal } from "@/components/fx/TextReveal";
-import { smoothScrollTo } from "@/components/fx/SmoothScroll";
 import { PricingCard } from "./PricingCard";
-import {
-  PACKAGE_TO_PROJECT_TYPE,
-  SERVICES_HANDOFF_KEY,
-  servicePackages,
-  servicesIntro,
-  type Locale,
-  type ServicePackageId,
-} from "@/content/services";
+import { handOffToContact } from "./handoff";
+import { servicePackages, servicesIntro, type Locale } from "@/content/services";
 
 /**
  * 06 SERVIZI & PRICING — tre pacchetti-tipo, non un listino (specs/06 §1).
@@ -24,27 +17,9 @@ import {
  * consumer nel form Contatti): scrive in localStorage + spedisce un
  * CustomEvent, poi fa scroll fluido a #contatti via Lenis
  * (`smoothScrollTo`, ART-DIRECTION §4 — mai uno scroll nativo quando Lenis
- * guida lo scroll del sito).
+ * guida lo scroll del sito). L'implementazione vive in ./handoff.ts, condivisa
+ * con ServicesMobile.
  */
-function handOffToContact(packageId: ServicePackageId) {
-  const projectType = PACKAGE_TO_PROJECT_TYPE[packageId];
-
-  try {
-    window.localStorage.setItem(SERVICES_HANDOFF_KEY, projectType);
-  } catch {
-    // localStorage indisponibile (privacy mode, ecc.) — non bloccante,
-    // il CustomEvent sotto resta il canale primario per un consumer già montato.
-  }
-
-  window.dispatchEvent(
-    new CustomEvent("servizi:project-type-selected", {
-      detail: { projectType, packageId },
-    }),
-  );
-
-  smoothScrollTo("#contatti");
-}
-
 export function ServicesSection() {
   const locale = useLocale() as Locale;
 

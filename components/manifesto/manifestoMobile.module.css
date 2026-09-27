@@ -1,0 +1,231 @@
+/* ============================================================================
+   03 MANIFESTO · MOBILE — tipografia ricomposta per 360–430px
+   ----------------------------------------------------------------------------
+   · Scala: ~26–31px (contro i 36px+ della desktop compressa): 6–7 righe da
+     ~20 battute, niente parole orfane a bandiera; `text-wrap: pretty` per un
+     rag regolare sull'ultima riga.
+   · Il "palco" in alto (padding-top) ospita la faglia e le farfalle: il
+     testo non ci passa mai sotto a piena luce.
+   · Nessun filtro, nessun blur, nessun backdrop: la faglia è un gradiente su
+     un elemento ruotato, animato solo in transform/opacity, in pausa fuori
+     viewport (data-live) e ferma sotto reduced-motion.
+   ========================================================================== */
+
+.section {
+  position: relative;
+  overflow-x: clip;
+  padding: 112px 0 64px;
+}
+
+/* --------------------------------------------------------------- la faglia */
+
+.rift {
+  position: absolute;
+  z-index: 0;
+  left: 70%;
+  top: 64px; /* == RIFT.cy in ManifestoMobile */
+  width: 170vw;
+  height: 150px;
+  transform: translate(-50%, -50%) rotate(-24deg);
+  pointer-events: none;
+  contain: strict;
+}
+
+/* Velo d'aurora: ellisse morbida allungata sul filo. */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 48% 50% at 50% 50%,
+    rgb(var(--aqua-rgb) / 0.26),
+    rgb(var(--aqua-rgb) / 0.08) 42%,
+    rgb(var(--aqua-rgb) / 0) 72%
+  );
+  opacity: 0.9;
+}
+
+/* "Cortina": raggi verticali che scorrono lungo la faglia, come le pieghe di
+   un'aurora. Un solo layer largo il doppio, traslato in loop (compositor). */
+.curtain {
+  position: absolute;
+  top: 18%;
+  bottom: 18%;
+  left: 0;
+  width: 200%;
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(var(--aqua-rgb) / 0) 0,
+    rgb(var(--aqua-rgb) / 0.13) 14px,
+    rgb(var(--aqua-rgb) / 0) 30px,
+    rgb(var(--aqua-rgb) / 0.06) 52px,
+    rgb(var(--aqua-rgb) / 0) 70px
+  );
+  -webkit-mask-image: radial-gradient(ellipse 25% 50% at 50% 50%, #000 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse 25% 50% at 50% 50%, #000 20%, transparent 75%);
+  opacity: 0.8;
+}
+
+/* Il filo incandescente: la ferita da cui esce la luce. */
+.filament {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 50%;
+  height: 1.5px;
+  margin-top: -0.75px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgb(var(--aqua-rgb) / 0),
+    rgb(168 255 238 / 0.9) 45%,
+    rgb(239 255 251 / 1) 52%,
+    rgb(var(--aqua-rgb) / 0.8) 60%,
+    rgb(var(--aqua-rgb) / 0)
+  );
+  box-shadow: 0 0 10px rgb(var(--aqua-rgb) / 0.6);
+}
+
+.section[data-live="true"] .curtain {
+  animation: m-curtain 14s linear infinite;
+}
+
+.section[data-live="true"] .veil,
+.section[data-live="true"] .filament {
+  animation: m-breathe 8s ease-in-out infinite;
+}
+
+@keyframes m-curtain {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes m-breathe {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------------- il testo */
+
+.inner {
+  position: relative;
+  z-index: 2;
+  padding: 0 var(--container-padding-x-mobile, 20px);
+}
+
+.rule {
+  width: 48px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--aqua-400), rgb(var(--aqua-rgb) / 0.15));
+  box-shadow: var(--glow-sm);
+  margin-bottom: 22px;
+  transform-origin: left center;
+}
+
+.line {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  /* 360px → ~25.8px · 390px → ~27px · 430px → ~28.6px */
+  font-size: clamp(1.5rem, 0.95rem + 4vw, 1.875rem);
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+  color: var(--text-hi);
+  max-width: 21ch;
+  text-wrap: pretty;
+  hyphens: manual;
+}
+
+.keyword {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--text-hi);
+  transition:
+    color 450ms var(--ease-inout),
+    text-shadow 520ms var(--ease-inout);
+}
+
+.keyword[data-lit="true"] {
+  color: var(--aqua-400);
+  text-shadow: var(--glow-text);
+}
+
+.secondary {
+  margin: 26px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pillar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-mid);
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--aqua-400);
+  box-shadow: var(--glow-xs);
+}
+
+.coda {
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  color: var(--text-low);
+}
+
+/* ---------------------------------------------------------------- il reveal
+   Un solo movimento per blocco (non per parola: 22 tween su un telefono
+   lento sono il primo jank della sezione). Senza JS il markup è già nello
+   stato finale: la classe .armed arriva solo dal client. */
+
+.armed .rule {
+  transform: scaleX(0);
+  transition: transform 420ms var(--ease-out);
+}
+
+.armed .line,
+.armed .secondary {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 700ms var(--ease-out),
+    transform 700ms var(--ease-out);
+}
+
+.armed .secondary {
+  transition-delay: 380ms;
+}
+
+.armed[data-shown="true"] .rule {
+  transform: none;
+}
+
+.armed[data-shown="true"] .line,
+.armed[data-shown="true"] .secondary {
+  opacity: 1;
+  transform: none;
+}

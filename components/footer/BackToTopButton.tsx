@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Tactile } from "@/components/ui/Tactile";
-import { smoothScrollTo } from "@/components/fx/SmoothScroll";
+import { smoothScrollTo } from "@/components/fx/scrollTo";
 
 export function BackToTopButton() {
   const t = useTranslations("footer");

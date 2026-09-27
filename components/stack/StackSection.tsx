@@ -2,7 +2,8 @@
 
 import { useLocale } from "next-intl";
 import { Container } from "@/components/ui/Container";
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import { SectionHeader, parseEmphasis } from "@/components/ui/SectionHeader";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 import { BlockReveal } from "@/components/fx/TextReveal";
 import { Tactile } from "@/components/ui/Tactile";
 import { stackIntro, stackItems, type Locale, type StackItem } from "@/content/stack";
@@ -21,6 +22,9 @@ import { stackIntro, stackItems, type Locale, type StackItem } from "@/content/s
  */
 export function StackSection() {
   const locale = useLocale() as Locale;
+  const mobile = useIsMobileVariant();
+
+  if (mobile) return <MobileStackSection locale={locale} />;
 
   return (
     <section
@@ -130,6 +134,99 @@ function StackTile({ item, index, locale }: { item: StackItem; index: number; lo
         ))}
       </ul>
     </Tactile>
+  );
+}
+
+/**
+ * Variante MOBILE — elenco a fisarmonica nativo (<details>/<summary>): zero
+ * JavaScript, accessibile da tastiera e screen reader, e TUTTO il testo resta
+ * nel DOM (Google indicizza la versione mobile). Chiuso sta in circa uno
+ * schermo: numero · titolo · una riga con gli strumenti; aperto mostra la
+ * descrizione e i chip. Nessun tilt, nessun wobble, nessun blur.
+ */
+function MobileStackSection({ locale }: { locale: Locale }) {
+  return (
+    <section id="stack" aria-labelledby="stack-title" className="relative overflow-x-clip py-16">
+      <span
+        aria-hidden="true"
+        className="aurora"
+        style={{
+          top: "0%",
+          right: "-35%",
+          width: "110vw",
+          height: "55vh",
+          background: "var(--aurora-abyss)",
+          opacity: 0.3,
+        }}
+      />
+      <div className="relative px-5">
+        <p className="eyebrow">{stackIntro.eyebrow[locale]}</p>
+        <h2
+          id="stack-title"
+          className="mt-4 font-[family-name:var(--font-display)] text-[length:var(--fs-h2)] font-medium leading-[var(--lh-h2)] tracking-[var(--ls-h2)] text-[var(--text-hi)] [text-wrap:balance]"
+        >
+          {parseEmphasis(stackIntro.title[locale])}
+        </h2>
+        <p className="mt-3 text-[15px] leading-[1.55] text-[var(--text-mid)] [text-wrap:pretty]">
+          {stackIntro.subtitle[locale]}
+        </p>
+
+        <ol className="mt-6 list-none overflow-hidden rounded-[var(--radius-lg)] border border-[var(--line)] bg-[rgba(11,20,26,0.72)]">
+          {stackItems.map((item, i) => (
+            <li key={item.id} className="border-b border-[var(--line)] last:border-b-0">
+              <details className="group">
+                <summary className="flex min-h-[58px] cursor-pointer list-none items-center gap-3 px-4 py-2.5 outline-none [-webkit-tap-highlight-color:transparent] active:bg-[rgb(var(--aqua-rgb)/0.06)] focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:-outline-offset-2 [&::-webkit-details-marker]:hidden">
+                  <span className="w-6 shrink-0 font-[family-name:var(--font-mono)] text-[11px] font-medium tracking-[0.08em] text-[var(--aqua-400)] [font-variant-numeric:tabular-nums]">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="font-[family-name:var(--font-display)] text-[16px] font-medium leading-[1.25] text-[var(--text-hi)]">
+                      {item.title[locale]}
+                    </span>
+                    <span className="truncate font-[family-name:var(--font-mono)] text-[11px] tracking-[0.02em] text-[var(--text-low)]">
+                      {item.tools.join(" · ")}
+                    </span>
+                  </span>
+                  <svg
+                    aria-hidden="true"
+                    width="12"
+                    height="8"
+                    viewBox="0 0 11 7"
+                    fill="none"
+                    className="shrink-0 text-[var(--text-mid)] transition-transform duration-200 group-open:rotate-180"
+                  >
+                    <path d="M1 1l4.5 4.5L10 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </summary>
+                <div className="px-4 pb-4 pl-[52px]">
+                  <p className="text-[14.5px] leading-[1.6] text-[var(--text-mid)] [text-wrap:pretty]">
+                    {item.body[locale]}
+                  </p>
+                  <ul
+                    className="mt-3 flex list-none flex-wrap gap-1.5"
+                    aria-label={locale === "it" ? "Strumenti" : "Tools"}
+                  >
+                    {item.tools.map((tool) => (
+                      <li
+                        key={tool}
+                        className="rounded-[var(--radius-full)] border border-[var(--line)] bg-[rgba(6,12,16,0.6)] px-2.5 py-1 font-[family-name:var(--font-mono)] text-[11px] text-[var(--text-hi)]"
+                      >
+                        {tool}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </details>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mt-5 flex items-center gap-3 font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[var(--ls-micro)] text-[var(--text-low)]">
+          <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-[var(--aqua-400)] shadow-[var(--glow-xs)]" />
+          {locale === "it" ? "Fatto a mano · IT / EN" : "Hand-built · IT / EN"}
+        </p>
+      </div>
+    </section>
   );
 }
 

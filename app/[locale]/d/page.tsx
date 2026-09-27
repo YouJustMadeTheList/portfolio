@@ -8,11 +8,17 @@ import { AboutSection } from "@/components/about/AboutSection";
 import { NetworkSection } from "@/components/network/NetworkSection";
 import { ContactSection } from "@/components/contact/ContactSection";
 import { StackSection } from "@/components/stack/StackSection";
+import { setRequestLocale } from "next-intl/server";
 
 // Ordine da ARCHITECTURE.md §2: Hero → Trust Bar → Manifesto → Case Studies →
 // Metodo → Servizi & Pricing → About/Traiettoria (+ 07bis Rete, opzionale) → Contatti
 // → Sotto il cofano (colophon tecnico, al posto della riga "costruito con" del footer)
-export default function Home() {
+type Props = { params: Promise<{ locale: string }> };
+
+export default async function Home({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
   return (
     <>
       <HeroSection />

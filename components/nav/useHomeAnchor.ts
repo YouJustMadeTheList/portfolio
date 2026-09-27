@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
-import { smoothScrollTo } from "@/components/fx/SmoothScroll";
+import { smoothScrollTo } from "@/components/fx/scrollTo";
 
 /**
  * Link alle sezioni della home che funzionano da QUALSIASI pagina.
@@ -26,10 +26,16 @@ export function useHomeAnchor() {
 
   /** Da usare come onClick: sulla home scrolla fluido, altrove lascia navigare. */
   const scrollIfHome = useCallback(
-    (e: React.MouseEvent, target: string | number): boolean => {
+    (e: React.MouseEvent, target: string | number, defer = false): boolean => {
       if (!isHome) return false;
       e.preventDefault();
-      smoothScrollTo(target);
+      // `defer`: aspetta due frame (il tempo che un overlay si smonti e lo
+      // scroll-lock venga rilasciato) prima di far partire lo scroll.
+      if (defer) {
+        requestAnimationFrame(() => requestAnimationFrame(() => smoothScrollTo(target)));
+      } else {
+        smoothScrollTo(target);
+      }
       return true;
     },
     [isHome],

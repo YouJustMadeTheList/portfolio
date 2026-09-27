@@ -4,7 +4,9 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocale } from "next-intl";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { ContactForm } from "@/components/contact/ContactForm";
-import { DirectChannels } from "@/components/contact/DirectChannels";
+import { DirectChannels, MobileChannels } from "@/components/contact/DirectChannels";
+import { ContactActionBar, CONTACT_FORM_ANCHOR } from "@/components/contact/ContactActionBar";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { ensureGsapRegistered, gsap, ScrollTrigger } from "@/lib/animation/gsap";
 import { contactCopy } from "@/content/contact";
@@ -16,6 +18,7 @@ export function ContactSection() {
   const locale = useLocale() as "it" | "en";
   const reducedMotion = usePrefersReducedMotion();
   const copy = contactCopy[locale];
+  const mobile = useIsMobileVariant();
 
   const sectionRef = useRef<HTMLElement | null>(null);
   const headingRef = useRef<HTMLDivElement | null>(null);
@@ -23,6 +26,9 @@ export function ContactSection() {
   const channelsColRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
+    // Mobile: nessun reveal scroll-driven — il contenuto è subito leggibile e
+    // non si paga ScrollTrigger per una sezione dove l'utente sta per agire.
+    if (mobile) return;
     ensureGsapRegistered();
     const section = sectionRef.current;
     if (!section) return;
@@ -62,7 +68,7 @@ export function ContactSection() {
     }, section);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [reducedMotion, mobile]);
 
   // Fallback no-JS (§7): se l'utente arriva qui dopo un submit senza JS, la route
   // ha già fatto il redirect 303 a /?contact=success|error#contatti — con JS attivo
@@ -77,6 +83,38 @@ export function ContactSection() {
       window.history.replaceState(null, "", newUrl);
     }
   }, []);
+
+  if (mobile) {
+    return (
+      <section id="contatti" className="contact-section relative overflow-x-clip py-16">
+        <span
+          aria-hidden="true"
+          className="aurora"
+          style={{
+            top: "-4%",
+            left: "-30%",
+            width: "110vw",
+            height: "60vh",
+            background: "var(--aurora-deep)",
+            opacity: 0.3,
+          }}
+        />
+        <div className="relative mx-auto w-full px-5">
+          <SectionHeader eyebrow={copy.eyebrow} title={copy.title} subtitle={copy.subtitle} />
+          <div
+            id={CONTACT_FORM_ANCHOR}
+            className="mt-8 scroll-mt-[calc(var(--nav-h)+12px)]"
+          >
+            <ContactForm locale={locale} reducedMotion={reducedMotion} />
+          </div>
+          <div className="mt-10">
+            <MobileChannels locale={locale} />
+          </div>
+        </div>
+        <ContactActionBar locale={locale} />
+      </section>
+    );
+  }
 
   return (
     <section

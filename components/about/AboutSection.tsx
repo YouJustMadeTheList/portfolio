@@ -1,13 +1,15 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import type { ReactNode } from "react";
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { BlockReveal } from "@/components/fx/TextReveal";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { DnaHelixTimeline } from "./DnaHelixTimeline";
 import { WritingShelf } from "./WritingShelf";
+import { AboutMobile } from "./AboutMobile";
+import { aboutHeader, withEmphasis } from "./aboutCopy";
+import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 import {
   timelinePhases,
   timelineEvents,
@@ -28,38 +30,14 @@ import {
  * in Instrument Serif italic aqua (ART-DIRECTION §2).
  */
 
-const header = {
-  it: {
-    eyebrow: "Traiettoria",
-    title: "Due binari, ⟨non due fasi⟩.",
-    subtitle:
-      "Sviluppo e IA nascono al liceo. Il lavoro con i clienti, l'azienda, il Politecnico — oggi procedono in parallelo.",
-  },
-  en: {
-    eyebrow: "Trajectory",
-    title: "Two tracks, ⟨not two phases⟩.",
-    subtitle:
-      "Development and AI started in high school. Client work, my own company, the Politecnico — today they run in parallel.",
-  },
-};
-
-/** Avvolge una sottostringa esatta in serif-italic aqua, lasciando intatto il copy. */
-function withEmphasis(text: string, phrase: string): ReactNode {
-  const at = phrase ? text.indexOf(phrase) : -1;
-  if (at < 0) return text;
-  return (
-    <>
-      {text.slice(0, at)}
-      <span className="serif-accent">{phrase}</span>
-      {text.slice(at + phrase.length)}
-    </>
-  );
-}
-
 export function AboutSection() {
   const locale = useLocale() as "it" | "en";
-  const copy = header[locale];
+  const copy = aboutHeader[locale];
   const reducedMotion = usePrefersReducedMotion();
+  const isMobile = useIsMobileVariant();
+
+  // Variante mobile (telefoni): implementazione dedicata, stessi contenuti.
+  if (isMobile) return <AboutMobile />;
 
   return (
     <section id="about" className="section-padding relative overflow-x-clip">
