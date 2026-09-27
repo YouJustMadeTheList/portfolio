@@ -1,0 +1,31 @@
+# Davide De Sanctis
+
+> Sviluppatore di soluzioni di intelligenza artificiale su misura per aziende (Italia).
+> AI Automation Specialist in Conio (fintech), studente di Ingegneria Informatica al
+> Politecnico di Milano, fondatore di una propria società. Lavora in italiano e inglese.
+
+## Servizi
+- Chatbot e sistemi RAG sui documenti aziendali: https://davidedesanctis.com/it/servizi/chatbot-rag-documenti-aziendali
+- LLM privati e on-premise: https://davidedesanctis.com/it/servizi/llm-privati-on-premise
+- Agenti AI e automazione dei processi: https://davidedesanctis.com/it/servizi/agenti-ai-automazione-processi
+- Sviluppo LLM: https://davidedesanctis.com/it/servizi/sviluppatore-llm
+- AI per fintech: https://davidedesanctis.com/it/servizi/ai-per-fintech
+- AI per edtech: https://davidedesanctis.com/it/servizi/ai-per-edtech
+
+## Dove incontra i clienti
+Roma, Milano, Pescara, Teramo, Bologna; progetti in tutta Italia da remoto.
+
+## Casi studio
+- Analytics con AI su oltre 2 milioni di documenti: https://davidedesanctis.com/it/casi-studio/analytics-ai-documenti
+- Motore di volatilità e liquidità su XAU/USD: https://davidedesanctis.com/it/casi-studio/motore-segnali-xauusd
+- Percorsi di apprendimento generati (Premio Di Nicola 2026): https://davidedesanctis.com/it/casi-studio/percorsi-apprendimento-adattivi
+- Locanda Camilla: https://davidedesanctis.com/it/casi-studio/locanda-camilla
+
+## Prezzi
+Su misura, definiti dopo una call gratuita.
+
+## Contatti
+- Sito: https://davidedesanctis.com
+- Chi sono: https://davidedesanctis.com/it/chi-sono
+- LinkedIn: https://www.linkedin.com/in/davide-de-sanctis-85b810271/
+- GitHub: https://github.com/YouJustMadeTheList

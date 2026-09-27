@@ -1,5 +1,8 @@
 import { setRequestLocale } from "next-intl/server";
+import { homeMetadata, HomeJsonLd } from "@/components/site/HomeSeo";
 import { MobileHome } from "@/components/mobile/MobileHome";
+
+export const generateMetadata = homeMetadata;
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -7,5 +10,10 @@ type Props = { params: Promise<{ locale: string }> };
 export default async function Home({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <MobileHome />;
+  return (
+    <>
+      <HomeJsonLd locale={locale} />
+      <MobileHome />
+    </>
+  );
 }

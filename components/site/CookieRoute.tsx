@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo/metadata";
 import { setRequestLocale } from "next-intl/server";
 import { cookiePolicy, type LegalLocale } from "@/content/legal";
 import { LegalDocument } from "@/components/legal/LegalDocument";
@@ -9,11 +10,15 @@ const pick = (l: string): LegalLocale => (l === "en" ? "en" : "it");
 
 export async function routeMetadata({ params }: Props): Promise<Metadata> {
   const doc = cookiePolicy[pick((await params).locale)];
-  return {
+  const locale = pick((await params).locale);
+  return pageMetadata({
+    locale,
+    path: `/${locale}/cookie`,
     title: doc.metaTitle,
+    absoluteTitle: true,
     description: doc.metaDescription,
-    alternates: { languages: { it: "/it/cookie", en: "/en/cookie" } },
-  };
+    alternates: { it: "/it/cookie", en: "/en/cookie" },
+  });
 }
 
 export async function CookiePage({ params }: Props) {

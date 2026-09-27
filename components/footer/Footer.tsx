@@ -7,6 +7,7 @@ import { BlockReveal } from "@/components/fx/TextReveal";
 import { navSections } from "@/content/nav";
 import { NavLink } from "@/components/nav/NavLink";
 import { BackToTopButton } from "./BackToTopButton";
+import { FooterDirectory } from "./FooterDirectory";
 import { Link } from "@/lib/i18n/navigation";
 import {
   contactEmail,
@@ -152,6 +153,10 @@ export function Footer() {
                 </li>
               </ul>
             </div>
+          </div>
+
+          <div className="mt-14 border-t border-[var(--line)] pt-10">
+            <FooterDirectory locale={locale} />
           </div>
 
           <div className="mt-16 flex flex-col-reverse items-center justify-between gap-6 border-t border-[var(--line)] pt-8 sm:flex-row lg:mt-20">
@@ -303,6 +308,10 @@ function MobileFooter() {
               ))}
             </ul>
           </div>
+        </div>
+
+        <div className="mt-8 border-t border-[var(--line)] pt-6">
+          <FooterDirectory locale={locale} compact />
         </div>
 
         <div className="mt-10 flex items-end justify-between gap-4 border-t border-[var(--line)] pt-6">

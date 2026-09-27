@@ -703,3 +703,9 @@ html[data-variant="m"] main > section#about { contain-intrinsic-size: auto 2500p
 html[data-variant="m"] main > section#contatti { contain-intrinsic-size: auto 1350px; }
 html[data-variant="m"] main > section#stack { contain-intrinsic-size: auto 625px; }
 html[data-variant="m"] body > footer { contain-intrinsic-size: auto 780px; }
+
+/* Pagine di contenuto su telefono: senza blur (variante mobile) le aurore
+   diventano rettangoli con il bordo visibile; il fondo globale basta. */
+html[data-variant="m"] .content-page > .aurora {
+  display: none;
+}

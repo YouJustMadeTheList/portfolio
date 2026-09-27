@@ -19,7 +19,21 @@ export function LocaleToggle({ className }: { className?: string }) {
       magnetic
       magneticMax={9}
       aria-label={t("localeToggleLabel")}
-      onClick={() => router.replace(pathname, { locale: next })}
+      onClick={() => {
+        // La pagina dichiara la sua traduzione nel <head> (hreflang): se c'è,
+        // si va lì (le pagine di contenuto hanno slug diversi per lingua);
+        // se la pagina non ha traduzione, home dell'altra lingua.
+        const alt = document.querySelector<HTMLLinkElement>(`link[rel="alternate"][hreflang="${next}"]`);
+        if (alt) {
+          const target = new URL(alt.href).pathname.replace(new RegExp(`^/${next}(?=/|$)`), "") || "/";
+          router.replace(target, { locale: next });
+        } else if (document.querySelector('link[rel="alternate"][hreflang]')) {
+          // pagina senza traduzione (es. le pagine città, solo in italiano)
+          router.replace("/", { locale: next });
+        } else {
+          router.replace(pathname, { locale: next });
+        }
+      }}
       className={cn(
         "relative isolate inline-flex items-center justify-center overflow-hidden",
         "rounded-[var(--radius-full)] px-3.5 py-1.5",
