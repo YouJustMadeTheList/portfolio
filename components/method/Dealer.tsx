@@ -24,6 +24,12 @@ import { useEffect, useRef, useState } from "react";
  */
 export const DEALER_SRC = "/dealer/dealer.webp";
 export const DEALER_LINES_SRC = "/dealer/dealer-lines.webp";
+/* Varianti ridotte (stessa grafica): il browser sceglie in base alla
+   larghezza reale della figura (≈ 51vw − 272px, vedi MethodSection) e al dpr. */
+const DEALER_SRCSET = "/dealer/dealer-560.webp 560w, /dealer/dealer-840.webp 840w, /dealer/dealer.webp 1121w";
+const DEALER_LINES_SRCSET = "/dealer/dealer-lines-560.webp 560w, /dealer/dealer-lines.webp 1121w";
+const DEALER_LINES_SMALL = "/dealer/dealer-lines-560.webp";
+const DEALER_SIZES = "(min-width: 1024px) calc(51vw - 272px), 1px";
 
 /* --------------------------------------------------------------------------
    Il braccio alzato (coordinate normalizzate sull'immagine rifilata).
@@ -79,13 +85,13 @@ export function Dealer({ reducedMotion }: { reducedMotion: boolean }) {
   const layers = (
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={DEALER_SRC} alt="" draggable={false} decoding="async" className="dealer-img" onError={() => setOk(false)} />
+      <img src={DEALER_SRC} srcSet={DEALER_SRCSET} sizes={DEALER_SIZES} alt="" draggable={false} loading="lazy" decoding="async" className="dealer-img" onError={() => setOk(false)} />
       {/* alone largo: linee molto sfocate e schiarite */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={DEALER_LINES_SRC} alt="" draggable={false} decoding="async" className="dealer-glow dealer-glow--wide" />
+      <img src={DEALER_LINES_SMALL} alt="" draggable={false} loading="lazy" decoding="async" className="dealer-glow dealer-glow--wide" />
       {/* alone stretto: il contorno "offuscato" subito attorno alla linea */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={DEALER_LINES_SRC} alt="" draggable={false} decoding="async" className="dealer-glow dealer-glow--near" />
+      <img src={DEALER_LINES_SRC} srcSet={DEALER_LINES_SRCSET} sizes={DEALER_SIZES} alt="" draggable={false} loading="lazy" decoding="async" className="dealer-glow dealer-glow--near" />
     </>
   );
 
@@ -193,7 +199,7 @@ function Particles({
     /* --- i contorni: letti una volta dal livello di sole linee --- */
     const img = new Image();
     img.decoding = "async";
-    img.src = DEALER_LINES_SRC;
+    img.src = DEALER_LINES_SMALL; // campionato a 260px: la variante piccola basta
     img.onload = () => {
       const sw = 260;
       const sh = Math.round((img.height / img.width) * sw);

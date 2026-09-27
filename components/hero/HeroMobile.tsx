@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/Badge";
 import { HeroHeadline } from "./HeroHeadline";
 import { heroCopy, type Locale } from "@/content/hero";
 import type { MobileScene } from "./mobileScene";
+import { hasRichWebGLAsync } from "@/lib/gfx/gpu";
 
 // Solo senza WebGL: il fallback 2D (stesso grafo, Canvas 2D). Mai nel bundle
 // iniziale.
@@ -182,6 +183,11 @@ export function HeroMobile() {
     const onVis = () => sync();
 
     const boot = async () => {
+      // senza GPU vera (render software) la rete 2D è più fluida del WebGL
+      if (!(await hasRichWebGLAsync())) {
+        if (!cancelled) setMode("fallback");
+        return;
+      }
       let mod: typeof import("./mobileScene");
       try {
         mod = await import("./mobileScene");

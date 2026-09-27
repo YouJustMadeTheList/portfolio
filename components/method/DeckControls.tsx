@@ -90,7 +90,7 @@ export function DeckControls({
         <span className="hidden sm:inline">{ui.prev}</span>
       </Tactile>
 
-      <div className="flex items-center gap-2.5" role="group" aria-label={ui.deckAria}>
+      <div className="flex items-center" role="group" aria-label={ui.deckAria}>
         {Array.from({ length: total }, (_, i) => {
           const isActive = i === activeIndex;
           return (
@@ -105,14 +105,20 @@ export function DeckControls({
               onClick={() => onJump(i)}
               aria-label={ui.goTo.replace("{n}", String(i + 1))}
               aria-current={isActive ? "step" : undefined}
-              className={cn(
-                "block rounded-[3px] border transition-[height,background-color,border-color,box-shadow] duration-300",
-                "h-[15px] w-[11px]",
-                isActive
-                  ? "h-[19px] border-[var(--aqua-300)] bg-[rgb(var(--aqua-rgb)/0.55)] shadow-[var(--glow-sm)]"
-                  : "border-[var(--line-hi)] bg-[rgb(var(--aqua-rgb)/0.05)] hover:border-[var(--aqua-300)] hover:bg-[rgb(var(--aqua-rgb)/0.2)]",
-              )}
-            />
+              // area di tocco 24×28 (WCAG 2.5.8); la tessera visibile resta 11×15
+              className="group grid h-7 w-6 place-items-center"
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "block rounded-[3px] border transition-[height,background-color,border-color,box-shadow] duration-300",
+                  "h-[15px] w-[11px]",
+                  isActive
+                    ? "h-[19px] border-[var(--aqua-300)] bg-[rgb(var(--aqua-rgb)/0.55)] shadow-[var(--glow-sm)]"
+                    : "border-[var(--line-hi)] bg-[rgb(var(--aqua-rgb)/0.05)] group-hover:border-[var(--aqua-300)] group-hover:bg-[rgb(var(--aqua-rgb)/0.2)]",
+                )}
+              />
+            </Tactile>
           );
         })}
       </div>

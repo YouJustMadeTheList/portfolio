@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 
 import { StaticFallback } from "./BackgroundStatic";
+import { hasRichWebGLAsync } from "@/lib/gfx/gpu";
 import type { ParticleFieldProps } from "./ParticleField";
 
 /**
@@ -26,7 +27,7 @@ import type { ParticleFieldProps } from "./ParticleField";
  * - `dpr={[1, 1.5]}`, mai 2.
  * - Caricato con next/dynamic({ ssr:false }): zero impatto sul primo paint.
  * - Fallback statico a gradiente CSS (gradienti + campo di punti FERMO) su:
- *   SSR, no-WebGL, prefers-reduced-motion.
+ *   SSR, no-WebGL, WebGL solo software (lib/gfx/gpu.ts), prefers-reduced-motion.
  * - `frameloop:'never'` quando la scheda è nascosta: il canvas resta montato,
  *   così tornare sulla scheda non ricompila shader né ricarica buffer.
  *
@@ -46,15 +47,6 @@ const Canvas = dynamic(
  * `radial-gradient` ripetuti su passi diversi (due "profondità": punti piccoli
  * e fiochi, punti più grandi e vicini). Nessuna animazione, nessun canvas.
  */
-function detectWebGL(): boolean {
-  try {
-    const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
-
 export interface BackgroundShaderProps {
   /** Opacità del piano fluido. Default 0.5. */
   opacity?: number;
@@ -70,10 +62,16 @@ export function BackgroundShader({ opacity = 0.5, particles }: BackgroundShaderP
   useEffect(() => {
     // sondaggio WebGL rimandato di un frame: non blocca il primo paint e non
     // innesca un render a cascata dentro il corpo dell'effetto
-    const probe = window.requestAnimationFrame(() => setWebgl(detectWebGL()));
+    let alive = true;
+    const probe = window.requestAnimationFrame(() => {
+      hasRichWebGLAsync().then((ok) => {
+        if (alive) setWebgl(ok);
+      });
+    });
     const onVis = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", onVis);
     return () => {
+      alive = false;
       window.cancelAnimationFrame(probe);
       document.removeEventListener("visibilitychange", onVis);
     };

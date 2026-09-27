@@ -10,7 +10,7 @@ import styles from "./manifestoMobile.module.css";
 
 /** Geometria della faglia CSS (manifestoMobile.module.css `.rift`), nel
     sistema del canvas delle farfalle — che sborda di BLEED sopra la sezione. */
-const RIFT = { cxFrac: 0.7, cy: 64 + MOBILE_BUTTERFLY_BLEED, angleDeg: -24 } as const;
+const RIFT = { cxFrac: 0.5, cy: 86 + MOBILE_BUTTERFLY_BLEED, angleDeg: -6, halfLenFrac: 0.45 } as const;
 
 /** Ritardo dell'accensione della keyword dopo la comparsa della frase (ms). */
 const KEYWORD_DELAY = 620;
@@ -18,7 +18,7 @@ const KEYWORD_DELAY = 620;
 /**
  * 03 MANIFESTO — variante MOBILE (telefoni; il tablet riceve la desktop).
  *
- * Stesso testo, stessa keyword accesa, stessa faglia con farfalle di numeri —
+ * Stesso testo, stessa keyword accesa, stessa faglia, da cui su telefono affiorano farfalle di luce —
  * ricomposti per 360–430px e per il budget di un telefono:
  *  · nessun WebGL (la faglia è CSS, le farfalle un canvas 2D a dpr 1, ≤40 glifi);
  *  · nessun GSAP/ScrollTrigger: un IntersectionObserver arma un reveal CSS
@@ -86,7 +86,9 @@ export function ManifestoMobile() {
     >
       <div aria-hidden="true" className={styles.rift}>
         <span className={styles.veil} />
-        <span className={styles.curtain} />
+        <span className={styles.curtainMask}>
+          <span className={styles.curtain} />
+        </span>
         <span className={styles.filament} />
       </div>
 

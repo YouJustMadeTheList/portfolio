@@ -51,6 +51,8 @@
   --text-hi: #e8f6f2;
   --text-mid: #8da6a3;
   --text-low: #5a6e70;
+  /* stessa famiglia, ma a 5:1 sul fondo del footer (#060c10): per testo piccolo (WCAG AA) */
+  --text-low-aa: #6f8587;
 
   /* --- Accento caldo — RAZIONATO: max 2 occorrenze in tutto il sito.
          Uso consentito: marker "oggi"/in corso sull'elica, badge "in produzione". --- */
@@ -672,3 +674,32 @@ html[data-variant="m"] .aurora {
   filter: none;
   opacity: 0.22;
 }
+
+/* ---------------------------------------------------------------------------
+   MOBILE · rendering pigro delle sezioni fuori schermo
+   Il primo layout di un telefono misurava e impaginava TUTTA la pagina
+   (~10.500px di testo) prima del primo paint. Con content-visibility le
+   sezioni lontane dallo schermo vengono impaginate solo quando si avvicinano.
+   Le altezze stimate (content-box, misurate a 375–430px) tengono ferma la
+   barra di scroll;
+   `auto` fa ricordare al browser l'altezza vera dopo il primo passaggio.
+   Nessuna sezione mobile usa ScrollTrigger: niente posizioni da ricalcolare.
+   Il manifesto resta fuori: le sue farfalle sbordano sopra la sezione e il
+   contenimento del paint le taglierebbe.
+   --------------------------------------------------------------------------- */
+html[data-variant="m"] main > section#progetti,
+html[data-variant="m"] main > section#metodo,
+html[data-variant="m"] main > section#servizi,
+html[data-variant="m"] main > section#about,
+html[data-variant="m"] main > section#contatti,
+html[data-variant="m"] main > section#stack,
+html[data-variant="m"] body > footer {
+  content-visibility: auto;
+}
+html[data-variant="m"] main > section#progetti { contain-intrinsic-size: auto 1000px; }
+html[data-variant="m"] main > section#metodo { contain-intrinsic-size: auto 690px; }
+html[data-variant="m"] main > section#servizi { contain-intrinsic-size: auto 900px; }
+html[data-variant="m"] main > section#about { contain-intrinsic-size: auto 2500px; }
+html[data-variant="m"] main > section#contatti { contain-intrinsic-size: auto 1350px; }
+html[data-variant="m"] main > section#stack { contain-intrinsic-size: auto 625px; }
+html[data-variant="m"] body > footer { contain-intrinsic-size: auto 780px; }

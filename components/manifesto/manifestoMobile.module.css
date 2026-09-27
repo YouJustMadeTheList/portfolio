@@ -14,7 +14,7 @@
 .section {
   position: relative;
   overflow-x: clip;
-  padding: 112px 0 64px;
+  padding: 164px 0 64px;
 }
 
 /* --------------------------------------------------------------- la faglia */
@@ -22,11 +22,11 @@
 .rift {
   position: absolute;
   z-index: 0;
-  left: 70%;
-  top: 64px; /* == RIFT.cy in ManifestoMobile */
-  width: 170vw;
-  height: 150px;
-  transform: translate(-50%, -50%) rotate(-24deg);
+  left: 50%;
+  top: 86px; /* == RIFT.cy in ManifestoMobile */
+  width: 120%;
+  height: 160px;
+  transform: translate(-50%, -50%) rotate(-6deg);
   pointer-events: none;
   contain: strict;
 }
@@ -36,7 +36,7 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    ellipse 48% 50% at 50% 50%,
+    ellipse 46% 46% at 50% 44%,
     rgb(var(--aqua-rgb) / 0.26),
     rgb(var(--aqua-rgb) / 0.08) 42%,
     rgb(var(--aqua-rgb) / 0) 72%
@@ -44,32 +44,40 @@
   opacity: 0.9;
 }
 
-/* "Cortina": raggi verticali che scorrono lungo la faglia, come le pieghe di
-   un'aurora. Un solo layer largo il doppio, traslato in loop (compositor). */
+/* "Cortina": raggi verticali che salgono dal filo, come le pieghe di
+   un'aurora. La maschera sta sul contenitore (ferma), il layer largo il
+   doppio scorre dentro (solo transform: compositor). */
+.curtainMask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 50%;
+  overflow: hidden;
+  -webkit-mask-image: radial-gradient(ellipse 44% 100% at 50% 100%, #000 15%, transparent 78%);
+  mask-image: radial-gradient(ellipse 44% 100% at 50% 100%, #000 15%, transparent 78%);
+}
+
 .curtain {
   position: absolute;
-  top: 18%;
-  bottom: 18%;
-  left: 0;
+  inset: 0 auto 0 0;
   width: 200%;
   background: repeating-linear-gradient(
     90deg,
     rgb(var(--aqua-rgb) / 0) 0,
-    rgb(var(--aqua-rgb) / 0.13) 14px,
-    rgb(var(--aqua-rgb) / 0) 30px,
-    rgb(var(--aqua-rgb) / 0.06) 52px,
-    rgb(var(--aqua-rgb) / 0) 70px
+    rgb(var(--aqua-rgb) / 0.12) 12px,
+    rgb(var(--aqua-rgb) / 0) 26px,
+    rgb(var(--aqua-rgb) / 0.05) 44px,
+    rgb(var(--aqua-rgb) / 0) 60px
   );
-  -webkit-mask-image: radial-gradient(ellipse 25% 50% at 50% 50%, #000 20%, transparent 75%);
-  mask-image: radial-gradient(ellipse 25% 50% at 50% 50%, #000 20%, transparent 75%);
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 /* Il filo incandescente: la ferita da cui esce la luce. */
 .filament {
   position: absolute;
-  left: 18%;
-  right: 18%;
+  left: 12%;
+  right: 12%;
   top: 50%;
   height: 1.5px;
   margin-top: -0.75px;
@@ -77,9 +85,11 @@
   background: linear-gradient(
     90deg,
     rgb(var(--aqua-rgb) / 0),
-    rgb(168 255 238 / 0.9) 45%,
-    rgb(239 255 251 / 1) 52%,
-    rgb(var(--aqua-rgb) / 0.8) 60%,
+    rgb(var(--aqua-rgb) / 0.55) 22%,
+    rgb(168 255 238 / 0.95) 42%,
+    rgb(239 255 251 / 1) 50%,
+    rgb(168 255 238 / 0.95) 58%,
+    rgb(var(--aqua-rgb) / 0.55) 78%,
     rgb(var(--aqua-rgb) / 0)
   );
   box-shadow: 0 0 10px rgb(var(--aqua-rgb) / 0.6);

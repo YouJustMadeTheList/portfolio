@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { hasRichWebGL, probeGpuAsync } from "@/lib/gfx/gpu";
 import {
   AURORA_FRAG,
   AURORA_VERT,
@@ -380,11 +381,32 @@ export function DataButterflies({
 }: DataButterfliesProps) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  /* Tutto il lavoro (contesto WebGL, shader, 7s di pre-simulazione) parte
+     solo quando la sezione è a meno di ~1.5 schermi: al caricamento la
+     pagina non paga un effetto che è ancora molto più in basso. */
+  const [near, setNear] = useState(false);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap || near) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          // la sonda GPU (asincrona) decide se il velo è shader o CSS
+          probeGpuAsync().then(() => setNear(true));
+        }
+      },
+      { rootMargin: "150% 0px" },
+    );
+    io.observe(wrap);
+    return () => io.disconnect();
+  }, [near]);
 
   useEffect(() => {
     const wrap = wrapRef.current;
     const canvas = canvasRef.current;
-    if (!wrap || !canvas) return;
+    if (!near || !wrap || !canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -403,7 +425,31 @@ export function DataButterflies({
     let disposed = false;
     const RESTORE_WAIT = 1200;
     const auroraScale = () => (narrow ? 0.6 : 0.5);
+    /* Senza GPU vera (lib/gfx/gpu.ts) lo shader del velo costerebbe secondi
+       di thread bloccato: al suo posto un velo CSS orientato sulla faglia. */
+    const richGL = hasRichWebGL();
+    let veil: HTMLDivElement | null = null;
+    const layoutVeil = () => {
+      if (!veil) return;
+      const dx = rift.xBot - rift.xTop;
+      const theta = Math.atan2(H, dx); // normale alla faglia, nel verso CSS
+      const deg = (theta * 180) / Math.PI;
+      const L = Math.abs(W * Math.sin(theta)) + Math.abs(H * Math.cos(theta));
+      const off = ((rift.xTop + rift.xBot) / 2 - W / 2) * Math.sin(theta);
+      const c = 50 + (off / L) * 100;
+      const w = (Math.max(120, W * 0.09) / L) * 100;
+      veil.style.background = `linear-gradient(${deg}deg, transparent ${c - w * 2.2}%, rgb(63 233 204 / 0.05) ${c - w}%, rgb(63 233 204 / 0.13) ${c}%, rgb(63 233 204 / 0.05) ${c + w}%, transparent ${c + w * 2.2}%)`;
+    };
     const mountAurora = () => {
+      if (!richGL) {
+        if (!veil) {
+          veil = document.createElement("div");
+          veil.className = "absolute inset-0";
+          wrap.insertBefore(veil, canvas);
+        }
+        layoutVeil();
+        return;
+      }
       window.clearTimeout(restoreTimer);
       aurora?.dispose();
       glCanvas?.remove();
@@ -506,6 +552,7 @@ export function DataButterflies({
         maxSwarms = Math.max(2, maxSwarms - 2);
         spawnRate *= 0.65;
       }
+      layoutVeil();
     };
 
     /** 1 fuori dal testo → glyphDim dentro, con 70px di sfumatura. */
@@ -1575,8 +1622,9 @@ export function DataButterflies({
       window.clearTimeout(restoreTimer);
       aurora?.dispose();
       glCanvas?.remove();
+      veil?.remove();
     };
-  }, [reducedMotion, avoidRef]);
+  }, [near, reducedMotion, avoidRef]);
 
   const mask = `linear-gradient(to bottom, transparent 0, #000 ${BLEED * 1.15}px, #000 calc(100% - ${BLEED * 1.15}px), transparent 100%)`;
 

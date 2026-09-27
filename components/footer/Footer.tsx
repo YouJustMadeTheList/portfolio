@@ -90,7 +90,7 @@ export function Footer() {
 
           <div className="mt-14 grid grid-cols-1 gap-12 sm:grid-cols-3 lg:mt-16">
             <div>
-              <p className="eyebrow">{copy.eyebrow}</p>
+              <p className="eyebrow" style={{ color: "var(--text-low-aa)" }}>{copy.eyebrow}</p>
               <p className="mt-4 max-w-xs text-[length:var(--fs-lead)] leading-[var(--lh-lead)] text-[var(--text-hi)] [text-wrap:pretty]">
                 {copy.ctaText}
               </p>
@@ -110,7 +110,7 @@ export function Footer() {
             </div>
 
             <div>
-              <p className="font-[family-name:var(--font-mono)] text-[length:var(--fs-micro)] font-medium uppercase tracking-[var(--ls-micro)] text-[var(--text-low)]">
+              <p className="font-[family-name:var(--font-mono)] text-[length:var(--fs-micro)] font-medium uppercase tracking-[var(--ls-micro)] text-[var(--text-low-aa)]">
                 {t("colSections")}
               </p>
               <ul className="mt-5 flex flex-col gap-3.5">
@@ -123,7 +123,7 @@ export function Footer() {
             </div>
 
             <div>
-              <p className="font-[family-name:var(--font-mono)] text-[length:var(--fs-micro)] font-medium uppercase tracking-[var(--ls-micro)] text-[var(--text-low)]">
+              <p className="font-[family-name:var(--font-mono)] text-[length:var(--fs-micro)] font-medium uppercase tracking-[var(--ls-micro)] text-[var(--text-low-aa)]">
                 {t("colConnect")}
               </p>
               <ul className="mt-5 flex flex-col gap-3.5 text-[length:var(--fs-body)]">
@@ -135,7 +135,7 @@ export function Footer() {
                 <li>
                   <PlaceholderAware value={instagramUrl} href={instagramUrl} note={copy.placeholderNote} external>
                     Instagram
-                    <span className="ml-2 font-[family-name:var(--font-mono)] text-[11px] tracking-[0.02em] text-[var(--text-low)]">
+                    <span className="ml-2 font-[family-name:var(--font-mono)] text-[11px] tracking-[0.02em] text-[var(--text-low-aa)]">
                       @{instagramHandle}
                     </span>
                   </PlaceholderAware>
@@ -156,7 +156,7 @@ export function Footer() {
 
           <div className="mt-16 flex flex-col-reverse items-center justify-between gap-6 border-t border-[var(--line)] pt-8 sm:flex-row lg:mt-20">
             <div className="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
-              <p className="text-[length:var(--fs-micro)] text-[var(--text-low)]">
+              <p className="text-[length:var(--fs-micro)] text-[var(--text-low-aa)]">
                 © {new Date().getFullYear()} Davide De Sanctis. {t("rights")}
               </p>
               <nav aria-label={t("colLegal")}>
@@ -212,7 +212,7 @@ function MobileFooter() {
   const linkClass =
     "inline-flex min-h-10 items-center text-[15px] text-[var(--text-mid)] outline-none active:text-[var(--aqua-300)] focus-visible:[outline:2px_solid_var(--focus-ring)] focus-visible:outline-offset-2 rounded-[var(--radius-xs)]";
   const colLabel =
-    "font-[family-name:var(--font-mono)] text-[length:var(--fs-micro)] font-medium uppercase tracking-[var(--ls-micro)] text-[var(--text-low)]";
+    "font-[family-name:var(--font-mono)] text-[length:var(--fs-micro)] font-medium uppercase tracking-[var(--ls-micro)] text-[var(--text-low-aa)]";
   const connect = [
     { value: linkedinUrl, href: linkedinUrl, label: "LinkedIn", external: true },
     { value: instagramUrl, href: instagramUrl, label: "Instagram", external: true },
@@ -246,11 +246,11 @@ function MobileFooter() {
         </p>
 
         <div className="mt-8">
-          <p className="eyebrow">{copy.eyebrow}</p>
+          <p className="eyebrow" style={{ color: "var(--text-low-aa)" }}>{copy.eyebrow}</p>
           <p className="mt-3 text-[17px] leading-[1.45] text-[var(--text-hi)] [text-wrap:pretty]">{copy.ctaText}</p>
           <p className="mt-1.5 text-[14.5px] text-[var(--text-mid)]">{t("tagline")}</p>
           {isPlaceholderValue(contactEmail) ? (
-            <p className="mt-2 text-[15px] text-[var(--text-low)]">
+            <p className="mt-2 text-[15px] text-[var(--text-low-aa)]">
               {copy.emailLabel} · {copy.placeholderNote}
             </p>
           ) : (
@@ -279,7 +279,7 @@ function MobileFooter() {
               {connect.map((c) => (
                 <li key={c.label}>
                   {isPlaceholderValue(c.value) ? (
-                    <span className={cn(linkClass, "text-[var(--text-low)]")}>{copy.placeholderNote}</span>
+                    <span className={cn(linkClass, "text-[var(--text-low-aa)]")}>{copy.placeholderNote}</span>
                   ) : (
                     <a
                       href={c.href}
@@ -293,7 +293,7 @@ function MobileFooter() {
                     >
                       {c.label}
                       {c.href === instagramUrl ? (
-                        <span className="font-[family-name:var(--font-mono)] text-[11px] tracking-[0.02em] text-[var(--text-low)]">
+                        <span className="font-[family-name:var(--font-mono)] text-[11px] tracking-[0.02em] text-[var(--text-low-aa)]">
                           @{instagramHandle}
                         </span>
                       ) : null}
@@ -330,7 +330,7 @@ function MobileFooter() {
                 </li>
               </ul>
             </nav>
-            <p className="text-[length:var(--fs-micro)] text-[var(--text-low)]">
+            <p className="text-[length:var(--fs-micro)] text-[var(--text-low-aa)]">
               © {new Date().getFullYear()} Davide De Sanctis. {t("rights")}
             </p>
           </div>
@@ -405,7 +405,7 @@ function PlaceholderAware({
         intensity="subtle"
         aria-disabled="true"
         title={note}
-        className="inline-flex cursor-default items-center gap-2 text-[var(--text-low)]"
+        className="inline-flex cursor-default items-center gap-2 text-[var(--text-low-aa)]"
       >
         {/* `label` invece di `children`: children può essere il valore grezzo
             (es. un indirizzo "TODO_…") e il marker interno
@@ -413,7 +413,7 @@ function PlaceholderAware({
         <span className="border-b border-dashed border-[var(--line)] pb-px">
           {label ?? children}
         </span>
-        <span className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[var(--ls-micro)] text-[var(--text-low)]">
+        <span className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[var(--ls-micro)] text-[var(--text-low-aa)]">
           {note}
         </span>
       </Tactile>

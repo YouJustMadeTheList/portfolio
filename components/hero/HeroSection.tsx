@@ -12,6 +12,7 @@ import type { SceneQuality } from "./Scene3D";
 import { heroCopy, type Locale } from "@/content/hero";
 import { useIsMobileVariant } from "@/components/variant/VariantProvider";
 import { HeroMobile } from "./HeroMobile";
+import { hasRichWebGLAsync } from "@/lib/gfx/gpu";
 
 // Caricata solo lato client, con un fallback leggerissimo: il testo dell'hero è
 // leggibile e interattivo prima che la scena esista (spec §7 "Bundle/preloader",
@@ -38,16 +39,6 @@ function ScenePlaceholder() {
       }}
     />
   );
-}
-
-function detectWebGL(): boolean {
-  try {
-    const canvas = document.createElement("canvas");
-    const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
-    return !!gl;
-  } catch {
-    return false;
-  }
 }
 
 /** Feature-detection per la qualità della scena — non solo user-agent sniffing (spec §7). */
@@ -117,10 +108,16 @@ function HeroDesktop() {
   useEffect(() => {
     // fuori dal commit sincrono: la detection non deve incatenare un secondo
     // render prima del primo paint — il testo dell'hero viene prima della scena.
-    const id = requestAnimationFrame(() =>
-      setCapability({ webgl: detectWebGL(), quality: detectQuality() }),
-    );
-    return () => cancelAnimationFrame(id);
+    let alive = true;
+    const id = requestAnimationFrame(() => {
+      hasRichWebGLAsync().then((webgl) => {
+        if (alive) setCapability({ webgl, quality: detectQuality() });
+      });
+    });
+    return () => {
+      alive = false;
+      cancelAnimationFrame(id);
+    };
   }, []);
 
   // Lenis guida lo scroll: gli scroll programmatici passano da smoothScrollTo,

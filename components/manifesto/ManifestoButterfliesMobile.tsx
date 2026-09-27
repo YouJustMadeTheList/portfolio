@@ -1,106 +1,164 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
-import { FOREWING, HINDWING, butterflySlotsLite, type Pt, type Slot } from "./butterflyShape";
 
 /* ============================================================================
-   03 MANIFESTO · MOBILE — le farfalle di numeri, versione tascabile
+   03 MANIFESTO · MOBILE — farfalle di luce
    ----------------------------------------------------------------------------
-   Stesso racconto della versione desktop (DataButterflies) — le cifre escono
-   dalla faglia, si ordinano in sagoma, si fondono in farfalla e volano via
-   oltre il bordo — ma con il budget di un telefono:
+   Su telefono la farfalla di cifre (desktop, DataButterflies) diventa una
+   farfalla vera: sagoma leggera di vetro scuro con il bordo acqua luminoso,
+   che affiora dalla faglia, apre le ali e sale via oltre il bordo, lasciando
+   un filo di pulviscolo.
 
-     · UN canvas 2D a dpr 1 (niente WebGL: sulla pagina mobile l'unico
-       contesto GL è l'hero). La faglia è CSS (vedi ManifestoMobile).
-     · ≤ 2 farfalle contemporaneamente, 18 glifi l'una, + ≤ 4 cifre libere:
-       tetto rigido di 40 glifi. Ogni glifo è un drawImage da un atlante
-       cotto una volta (alone già dentro): niente fillText né shadowBlur a
-       runtime.
-     · 30 fps: il volo è lento, il doppio dei frame non si vedrebbe ma si
-       pagherebbe in batteria.
-     · rAF SOLO con la sezione a schermo (IntersectionObserver) e scheda
-       visibile (visibilitychange). Misure al resize (ResizeObserver), mai nel
-       loop: zero letture di layout per frame.
-     · reduced-motion: nessun rAF — un solo fotogramma (una farfalla posata
-       sulla faglia), ridisegnato solo al resize.
+     · UN canvas 2D, dpr ≤ 1.5. La farfalla è UNO sprite (mezza farfalla)
+       cotto una volta con l'alone dentro: a runtime solo 2 drawImage per
+       farfalla (ala destra + specchio), niente shadowBlur né path.
+     · ≤ 3 farfalle in aria, 30 fps, rAF SOLO a schermo e a scheda visibile.
+     · reduced-motion: un solo fotogramma (una farfalla posata sulla faglia).
    ========================================================================== */
 
 type Props = {
   reducedMotion: boolean;
-  /** Il testo: dentro il suo rettangolo i glifi si attenuano (contrasto AA). */
+  /** Il testo: dentro il suo rettangolo le farfalle si attenuano (contrasto AA). */
   avoidRef: RefObject<HTMLElement | null>;
   /** Geometria della faglia CSS, in px dal bordo alto del canvas. */
-  rift: { cxFrac: number; cy: number; angleDeg: number };
+  rift: { cxFrac: number; cy: number; angleDeg: number; halfLenFrac: number };
 };
 
 /** Il canvas sborda sopra la sezione: le farfalle escono "dalla pagina". */
 export const MOBILE_BUTTERFLY_BLEED = 72;
 
-const DIGITS = "0123456789";
-const CELL = 22; // px, dpr 1
-const FONT = 11;
-const MAX_GLYPHS = 40;
-const MAX_SWARMS = 2;
 const FRAME_MS = 1000 / 30;
-const SPAWN_EVERY = 3.4; // s — con un ciclo di ~6.5s restano 1–2 farfalle in aria
-const T_GATHER = 1.3;
-const T_FUSE = 1.9;
-const T_WAKE = 2.5;
+const MAX_FLYERS = 3;
+const SPAWN_EVERY = 2.9; // s
+const T_EMERGE = 1.1; // s: dalla faglia alle ali aperte
+const TRAIL = 7;
+/** Semi-apertura alare di riferimento in px CSS (apertura totale ≈ 2×). */
+const SPAN = 13;
+/** Risoluzione dello sprite: lo cuociamo a 3× per restare nitidi a dpr 1.5 e in scala. */
+const BAKE = 3;
 
-const SLOTS: Slot[] = butterflySlotsLite();
-
-type Swarm = {
+type Flyer = {
   t: number;
-  cx: number;
-  cy: number;
   x: number;
   y: number;
-  S: number;
-  /** direzione di volo (−1 sinistra, +1 destra) e quota */
+  /** direzione laterale (−1 sinistra, +1 destra) */
   dir: number;
+  size: number;
   flap: number;
-  /** origini delle cifre sul filo della faglia */
-  ox: Float32Array;
-  oy: Float32Array;
-  d: Uint8Array;
+  flapHz: number;
+  sway: number;
+  heading: number;
+  tx: Float32Array;
+  ty: Float32Array;
+  head: number;
   alive: boolean;
 };
 
-type Free = { x: number; y: number; vx: number; vy: number; age: number; life: number; d: number };
-
-function bakeAtlas(family: string): HTMLCanvasElement {
+/** Mezza farfalla (lato destro, corpo sull'asse x = 0, testa verso −y). */
+function bakeWing(): { img: HTMLCanvasElement; ox: number; oy: number; w: number; h: number } {
+  const S = SPAN * BAKE;
+  const pad = 6 * BAKE;
+  const w = Math.ceil(S * 1.08 + pad * 2);
+  const h = Math.ceil(S * 2 + pad * 2);
   const c = document.createElement("canvas");
-  c.width = CELL * (DIGITS.length + 1);
-  c.height = CELL * 2;
+  c.width = w;
+  c.height = h;
+  const g = c.getContext("2d");
+  const ox = pad; // x del corpo nello sprite
+  const oy = pad + S * 1.02; // y del corpo nello sprite
+  if (!g) return { img: c, ox, oy, w, h };
+
+  g.translate(ox, oy);
+  g.scale(S, S);
+
+  // ala anteriore: ampia, apice appuntito, margine esterno leggermente concavo
+  const fore = new Path2D();
+  fore.moveTo(0.03, -0.1);
+  fore.bezierCurveTo(0.2, -0.56, 0.56, -0.96, 1.02, -0.98);
+  fore.bezierCurveTo(1.0, -0.72, 0.86, -0.38, 0.64, -0.14);
+  fore.bezierCurveTo(0.44, -0.02, 0.2, 0.0, 0.05, -0.01);
+  fore.closePath();
+
+  // ala posteriore: più piccola, tonda, con una breve coda
+  const hind = new Path2D();
+  hind.moveTo(0.05, 0.01);
+  hind.bezierCurveTo(0.46, -0.06, 0.74, 0.14, 0.66, 0.4);
+  hind.bezierCurveTo(0.6, 0.58, 0.42, 0.6, 0.3, 0.66);
+  hind.bezierCurveTo(0.26, 0.76, 0.24, 0.86, 0.19, 0.9);
+  hind.bezierCurveTo(0.14, 0.78, 0.13, 0.66, 0.12, 0.58);
+  hind.bezierCurveTo(0.05, 0.42, 0.03, 0.22, 0.03, 0.08);
+  hind.closePath();
+
+  // vetro scuro traslucido, acceso verso il corpo
+  const fill = g.createRadialGradient(0, 0, 0, 0, 0, 1.05);
+  fill.addColorStop(0, "rgba(111,247,222,0.42)");
+  fill.addColorStop(0.45, "rgba(63,233,204,0.16)");
+  fill.addColorStop(1, "rgba(10,47,63,0.28)");
+  g.fillStyle = fill;
+  g.fill(fore);
+  g.fill(hind);
+
+  // venature appena accennate
+  g.strokeStyle = "rgba(168,255,238,0.22)";
+  g.lineWidth = (0.6 * BAKE) / S;
+  g.beginPath();
+  g.moveTo(0.05, -0.06);
+  g.quadraticCurveTo(0.46, -0.52, 0.92, -0.9);
+  g.moveTo(0.06, -0.04);
+  g.quadraticCurveTo(0.5, -0.3, 0.84, -0.5);
+  g.moveTo(0.06, 0.04);
+  g.quadraticCurveTo(0.36, 0.2, 0.52, 0.5);
+  g.stroke();
+
+  // bordo luminoso: alone largo + filo netto
+  g.shadowColor = "rgba(63,233,204,0.95)";
+  g.shadowBlur = 5 * BAKE;
+  g.strokeStyle = "rgba(111,247,222,0.9)";
+  g.lineWidth = (1.1 * BAKE) / S;
+  g.stroke(fore);
+  g.stroke(hind);
+  g.shadowBlur = 0;
+  g.strokeStyle = "rgba(239,255,251,0.85)";
+  g.lineWidth = (0.5 * BAKE) / S;
+  g.stroke(fore);
+  g.stroke(hind);
+
+  // mezzo corpo + antenna (lo specchio completa l'altra metà)
+  g.fillStyle = "rgba(239,255,251,0.9)";
+  g.beginPath();
+  g.ellipse(0, 0.08, 0.035, 0.34, 0, -Math.PI / 2, Math.PI / 2);
+  g.fill();
+  g.strokeStyle = "rgba(168,255,238,0.75)";
+  g.lineWidth = (0.45 * BAKE) / S;
+  g.beginPath();
+  g.moveTo(0.01, -0.24);
+  g.quadraticCurveTo(0.08, -0.5, 0.2, -0.62);
+  g.stroke();
+  g.fillStyle = "rgba(239,255,251,0.9)";
+  g.beginPath();
+  g.arc(0.2, -0.62, 0.028, 0, Math.PI * 2);
+  g.fill();
+
+  return { img: c, ox, oy, w, h };
+}
+
+/** Punto di luce morbido per scia e bagliore d'uscita. */
+function bakeDot(): HTMLCanvasElement {
+  const c = document.createElement("canvas");
+  c.width = c.height = 32;
   const g = c.getContext("2d");
   if (!g) return c;
-  g.textAlign = "center";
-  g.textBaseline = "middle";
-  g.font = `500 ${FONT}px ${family}`;
-  for (let row = 0; row < 2; row += 1) {
-    for (let i = 0; i < DIGITS.length; i += 1) {
-      const x = i * CELL + CELL / 2;
-      const y = row * CELL + CELL / 2 + 0.5;
-      g.shadowColor = row === 0 ? "rgba(63,233,204,0.8)" : "rgba(168,255,238,0.95)";
-      g.shadowBlur = row === 0 ? 5 : 8;
-      g.fillStyle = row === 0 ? "#6FF7DE" : "#EFFFFB";
-      g.fillText(DIGITS[i], x, y);
-      g.shadowBlur = 0;
-      g.fillText(DIGITS[i], x, y);
-    }
-  }
-  // disco di luce per il lampo di fusione
-  const gx = DIGITS.length * CELL + CELL / 2;
-  const grad = g.createRadialGradient(gx, CELL / 2, 0, gx, CELL / 2, CELL / 2);
-  grad.addColorStop(0, "rgba(168,255,238,0.9)");
-  grad.addColorStop(0.35, "rgba(63,233,204,0.35)");
-  grad.addColorStop(1, "rgba(10,47,63,0)");
+  const grad = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+  grad.addColorStop(0, "rgba(239,255,251,0.95)");
+  grad.addColorStop(0.25, "rgba(111,247,222,0.6)");
+  grad.addColorStop(1, "rgba(63,233,204,0)");
   g.fillStyle = grad;
-  g.fillRect(DIGITS.length * CELL, 0, CELL, CELL);
+  g.fillRect(0, 0, 32, 32);
   return c;
 }
 
-const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
+const ease = (x: number) => (x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(1 - x, 3));
 
 export function ManifestoButterfliesMobile({ reducedMotion, avoidRef, rift }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -111,39 +169,34 @@ export function ManifestoButterfliesMobile({ reducedMotion, avoidRef, rift }: Pr
     const ctx = canvas?.getContext("2d", { alpha: true });
     if (!canvas || !host || !ctx) return;
 
-    const family =
-      getComputedStyle(document.documentElement).getPropertyValue("--font-mono").trim() || "monospace";
-    let atlas = bakeAtlas(family);
-    // il font mono può arrivare dopo il primo effetto: ricuoci una volta
-    document.fonts?.ready.then(() => {
-      atlas = bakeAtlas(family);
-      if (reducedMotion) drawStatic();
-    });
+    const wing = bakeWing();
+    const dot = bakeDot();
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
     let W = 0;
     let H = 0;
-    // rettangolo del testo nel sistema del canvas
     let tx0 = 0;
     let ty0 = 0;
     let tx1 = 0;
     let ty1 = 0;
-    // la faglia: punto centrale + direzione unitaria
     let rcx = 0;
     let rcy = 0;
+    let rHalf = 0;
     const ang = (rift.angleDeg * Math.PI) / 180;
     const rdx = Math.cos(ang);
     const rdy = Math.sin(ang);
 
     const measure = () => {
       const r = host.getBoundingClientRect();
+      const c = canvas.getBoundingClientRect();
       W = Math.max(1, Math.round(r.width));
-      H = Math.max(1, Math.round(canvas.getBoundingClientRect().height));
-      canvas.width = W; // dpr 1, voluto
-      canvas.height = H;
+      H = Math.max(1, Math.round(c.height));
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
       rcx = W * rift.cxFrac;
       rcy = rift.cy;
+      rHalf = W * rift.halfLenFrac;
       const t = avoidRef.current?.getBoundingClientRect();
-      const c = canvas.getBoundingClientRect();
       if (t) {
         tx0 = t.left - c.left - 6;
         ty0 = t.top - c.top - 6;
@@ -152,175 +205,134 @@ export function ManifestoButterfliesMobile({ reducedMotion, avoidRef, rift }: Pr
       }
     };
 
-    const dimAt = (x: number, y: number) => (x > tx0 && x < tx1 && y > ty0 && y < ty1 ? 0.28 : 1);
+    const dimAt = (x: number, y: number) => (x > tx0 && x < tx1 && y > ty0 && y < ty1 ? 0.3 : 1);
 
-    const swarms: Swarm[] = [];
-    const free: Free[] = [];
-    let spawnClock = 0.6;
+    const flyers: Flyer[] = [];
+    let spawnClock = 0.5;
     let flip = Math.random() < 0.5 ? -1 : 1;
 
-    const spawnSwarm = () => {
-      const n = SLOTS.length;
-      const ox = new Float32Array(n);
-      const oy = new Float32Array(n);
-      const d = new Uint8Array(n);
-      // tratto di faglia da cui trasudano le cifre
-      const along = (Math.random() - 0.5) * Math.min(W, 320) * 0.5;
-      for (let i = 0; i < n; i += 1) {
-        const s = along + (Math.random() - 0.5) * 70;
-        ox[i] = rcx + rdx * s + (Math.random() - 0.5) * 6;
-        oy[i] = rcy + rdy * s + (Math.random() - 0.5) * 6;
-        d[i] = (Math.random() * 10) | 0;
-      }
+    const spawn = () => {
       flip = -flip;
-      // la farfalla si compone poco sopra la faglia, nel "palco" alto della sezione
-      const cx = Math.min(W - 40, Math.max(40, rcx + rdx * along - flip * 30));
-      const cy = Math.max(28, rcy + rdy * along - 34);
-      swarms.push({
+      // un punto del filo, lontano dalle punte sfumate
+      const s = (Math.random() * 2 - 1) * rHalf * 0.62;
+      const x = rcx + rdx * s;
+      const y = rcy + rdy * s;
+      const f: Flyer = {
         t: 0,
-        cx,
-        cy,
-        x: cx,
-        y: cy,
-        S: 25 + Math.random() * 7,
+        x,
+        y,
         dir: flip,
-        flap: Math.random() * 6,
-        ox,
-        oy,
-        d,
+        size: 0.8 + Math.random() * 0.35,
+        flap: Math.random() * Math.PI * 2,
+        flapHz: 2.6 + Math.random() * 0.8,
+        sway: Math.random() * Math.PI * 2,
+        heading: 0,
+        tx: new Float32Array(TRAIL).fill(x),
+        ty: new Float32Array(TRAIL).fill(y),
+        head: 0,
         alive: true,
-      });
+      };
+      flyers.push(f);
     };
 
-    const drawGlyph = (d: number, hot: number, x: number, y: number, a: number, s: number) => {
+    /** Disegna una farfalla: posizione, rotazione, apertura (0..1), scala, alpha. */
+    const drawButterfly = (x: number, y: number, rot: number, open: number, scale: number, a: number) => {
+      if (a <= 0.01) return;
+      const k = scale / BAKE;
+      const cos = Math.cos(rot);
+      const sin = Math.sin(rot);
+      ctx.globalAlpha = a * dimAt(x, y);
+      for (const side of [1, -1]) {
+        const sx = k * open * side;
+        ctx.setTransform(dpr * cos * sx, dpr * sin * sx, -dpr * sin * k, dpr * cos * k, dpr * x, dpr * y);
+        ctx.drawImage(wing.img, -wing.ox, -wing.oy);
+      }
+    };
+
+    const drawDot = (x: number, y: number, r: number, a: number) => {
       if (a <= 0.01) return;
       ctx.globalAlpha = a * dimAt(x, y);
-      const sz = CELL * s;
-      ctx.drawImage(atlas, d * CELL, hot > 0.5 ? CELL : 0, CELL, CELL, x - sz / 2, y - sz / 2, sz, sz);
-    };
-
-    const wingPath = (poly: readonly Pt[], x: number, y: number, S: number, fold: number, side: number) => {
-      ctx.moveTo(x + poly[0][0] * S * fold * side, y + poly[0][1] * S);
-      for (let i = 1; i < poly.length; i += 1) {
-        ctx.lineTo(x + poly[i][0] * S * fold * side, y + poly[i][1] * S);
-      }
-      ctx.closePath();
-    };
-
-    const drawSwarm = (sw: Swarm) => {
-      const t = sw.t;
-      // 0 → 1: cifre dalla faglia alla sagoma (sagoma larga)
-      const gather = ease(t / T_GATHER);
-      // la sagoma si stringe fino alla fusione
-      const tight = ease((t - T_GATHER) / (T_FUSE - T_GATHER));
-      const spread = 1.2 - 0.2 * tight;
-      const fused = t >= T_FUSE;
-      const flash = fused ? Math.max(0, 1 - (t - T_FUSE) / 0.45) : 0;
-      // battito: lento al risveglio, poi regolare
-      const flapPhase = sw.flap + Math.max(0, t - T_FUSE) * (t > T_WAKE ? 7.5 : 3.2);
-      const fold = fused ? 0.3 + 0.7 * Math.abs(Math.cos(flapPhase)) : 1;
-      // uscita: dissolvenza sugli ultimi 40px prima del bordo
-      const edge = Math.min(sw.x + sw.S, W - sw.x + sw.S, sw.y + sw.S);
-      const fadeOut = Math.min(1, Math.max(0, edge / 40));
-      const S = sw.S * spread;
-
-      if (fused) {
-        const memA = Math.min(1, (t - T_FUSE) / 0.3) * 0.22 * fadeOut * dimAt(sw.x, sw.y);
-        ctx.globalAlpha = memA;
-        ctx.beginPath();
-        wingPath(FOREWING, sw.x, sw.y, S, fold, 1);
-        wingPath(FOREWING, sw.x, sw.y, S, fold, -1);
-        wingPath(HINDWING, sw.x, sw.y, S, fold, 1);
-        wingPath(HINDWING, sw.x, sw.y, S, fold, -1);
-        ctx.fill();
-        if (flash > 0) {
-          ctx.globalAlpha = flash * 0.8 * dimAt(sw.x, sw.y);
-          const r = S * 2.4;
-          ctx.drawImage(atlas, DIGITS.length * CELL, 0, CELL, CELL, sw.x - r, sw.y - r, r * 2, r * 2);
-        }
-      }
-
-      for (let i = 0; i < SLOTS.length; i += 1) {
-        const sl = SLOTS[i];
-        const fx = sl.wing ? sl.x * fold : sl.x;
-        const tx = sw.x + fx * S;
-        const ty = sw.y + sl.y * S;
-        // arrivi scaglionati: ogni cifra parte un po' dopo la precedente
-        const k = ease((gather * 1.6 - (i / SLOTS.length) * 0.6) / 1);
-        const x = sw.ox[i] + (tx - sw.ox[i]) * k;
-        const y = sw.oy[i] + (ty - sw.oy[i]) * k - Math.sin(k * Math.PI) * 14;
-        const hot = t < 0.25 || (t > T_FUSE - 0.2 && t < T_FUSE + 0.35) ? 1 : 0;
-        const a = Math.min(1, t / 0.25) * (fused ? 0.9 : 0.75) * fadeOut;
-        drawGlyph(sw.d[i], hot, x, y, a, sl.wing ? 0.9 : 0.75);
-      }
+      ctx.drawImage(dot, x - r, y - r, r * 2, r * 2);
     };
 
     const step = (dt: number) => {
       spawnClock -= dt;
-      if (spawnClock <= 0 && swarms.length < MAX_SWARMS) {
-        spawnSwarm();
-        spawnClock = SPAWN_EVERY * (0.85 + Math.random() * 0.3);
+      if (spawnClock <= 0 && flyers.length < MAX_FLYERS) {
+        spawn();
+        spawnClock = SPAWN_EVERY * (0.8 + Math.random() * 0.4);
       }
-      for (const sw of swarms) {
-        sw.t += dt;
-        if (sw.t > T_WAKE) {
-          // volo: curva ascendente e laterale, accelera dolcemente
-          const f = sw.t - T_WAKE;
-          const v = 26 + f * 22;
-          sw.x += sw.dir * v * 0.85 * dt;
-          sw.y -= (v * 0.55 + Math.sin(f * 2.2) * 10) * dt;
-        } else if (sw.t > T_FUSE) {
-          sw.y = sw.cy - Math.sin(((sw.t - T_FUSE) / (T_WAKE - T_FUSE)) * Math.PI) * 3;
+      for (const f of flyers) {
+        f.t += dt;
+        if (f.t > T_EMERGE * 0.55) {
+          // volo: sale e deriva di lato, con un'ondulazione morbida
+          const fl = f.t - T_EMERGE * 0.55;
+          const v = Math.min(1, fl / 1.2);
+          const vx = f.dir * (14 + fl * 5) * v + Math.sin(fl * 1.7 + f.sway) * 16 * v;
+          const vy = -(22 + fl * 6) * v + Math.cos(fl * 2.3 + f.sway) * 9 * v;
+          f.x += vx * dt;
+          f.y += vy * dt;
+          // la testa segue la rotta, con inerzia
+          const target = Math.atan2(vx, -vy) * 0.55;
+          f.heading += (target - f.heading) * Math.min(1, dt * 3);
         }
-        if (sw.x < -sw.S * 2 || sw.x > W + sw.S * 2 || sw.y < -sw.S * 2) sw.alive = false;
-        // una cifra ogni tanto cambia: sono dati, non decorazione
-        if (Math.random() < dt * 1.5) sw.d[(Math.random() * sw.d.length) | 0] = (Math.random() * 10) | 0;
+        f.head = (f.head + 1) % TRAIL;
+        f.tx[f.head] = f.x;
+        f.ty[f.head] = f.y;
+        const m = 40 * f.size;
+        if (f.x < -m || f.x > W + m || f.y < -m) f.alive = false;
       }
-      for (let i = swarms.length - 1; i >= 0; i -= 1) if (!swarms[i].alive) swarms.splice(i, 1);
-
-      // poche cifre libere che trasudano dal filo (entro il tetto dei 40 glifi)
-      const budget = MAX_GLYPHS - swarms.length * SLOTS.length;
-      if (free.length < Math.min(4, budget) && Math.random() < dt * 2.2) {
-        const s = (Math.random() - 0.5) * Math.min(W, 360);
-        free.push({
-          x: rcx + rdx * s,
-          y: rcy + rdy * s,
-          vx: (Math.random() - 0.5) * 8,
-          vy: -6 - Math.random() * 8,
-          age: 0,
-          life: 2.2 + Math.random() * 1.4,
-          d: (Math.random() * 10) | 0,
-        });
-      }
-      for (let i = free.length - 1; i >= 0; i -= 1) {
-        const g = free[i];
-        g.age += dt;
-        g.x += g.vx * dt;
-        g.y += g.vy * dt;
-        if (g.age > g.life) free.splice(i, 1);
-      }
+      for (let i = flyers.length - 1; i >= 0; i -= 1) if (!flyers[i].alive) flyers.splice(i, 1);
     };
 
     const draw = () => {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalAlpha = 1;
-      ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = "rgb(63,233,204)";
-      for (const g of free) {
-        const k = g.age / g.life;
-        drawGlyph(g.d, k < 0.15 ? 1 : 0, g.x, g.y, Math.sin(k * Math.PI) * 0.55, 0.8);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      for (const f of flyers) {
+        const e = ease(f.t / T_EMERGE);
+        // uscita morbida negli ultimi 36px prima del bordo
+        const edge = Math.min(f.x + 20, W - f.x + 20, f.y + 20);
+        const fade = Math.min(1, Math.max(0, edge / 36));
+
+        // bagliore sul filo, quando la farfalla affiora
+        if (f.t < T_EMERGE) {
+          const g = Math.sin(Math.min(1, f.t / T_EMERGE) * Math.PI);
+          drawDot(f.x, f.y, 16 * g + 4, 0.55 * g);
+        }
+
+        // scia: pochi punti di luce che si spengono
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (f.t > T_EMERGE * 0.6) {
+          for (let i = 1; i < TRAIL; i += 1) {
+            const j = (f.head - i + TRAIL) % TRAIL;
+            const k = 1 - i / TRAIL;
+            drawDot(f.tx[j], f.ty[j] + 3, 1.2 + 2.2 * k, 0.32 * k * fade);
+          }
+        }
+
+        // ali: chiuse all'affioramento, poi battito ampio e lento
+        const beat = 0.5 + 0.5 * Math.cos(f.t * f.flapHz * Math.PI * 2 + f.flap);
+        const open = (0.18 + 0.82 * (0.22 + 0.78 * beat)) * (0.35 + 0.65 * e);
+        drawButterfly(f.x, f.y, f.heading, open, f.size * (0.45 + 0.55 * e), Math.min(1, f.t / 0.35) * fade);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       }
-      for (const sw of swarms) drawSwarm(sw);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.globalAlpha = 1;
     };
 
     function drawStatic() {
       measure();
-      swarms.length = 0;
-      free.length = 0;
-      spawnSwarm();
-      const sw = swarms[0];
-      sw.t = T_FUSE + 0.8; // posata, ali aperte, senza lampo
-      sw.flap = 0;
+      flyers.length = 0;
+      spawn();
+      const f = flyers[0];
+      f.x = rcx;
+      f.y = rcy - 22;
+      f.t = T_EMERGE + 0.2;
+      f.flap = 0;
+      f.tx.fill(f.x);
+      f.ty.fill(f.y);
       draw();
     }
 
@@ -372,13 +384,16 @@ export function ManifestoButterfliesMobile({ reducedMotion, avoidRef, rift }: Pr
     const onVis = () => (document.hidden ? stop() : start());
     document.addEventListener("visibilitychange", onVis);
 
-    // solo i cambi di LARGHEZZA contano (la barra URL di iOS cambia l'altezza
-    // del viewport, non quella della sezione)
+    // misure ricalcolate quando la sezione cambia davvero taglia (anche in
+    // altezza: con content-visibility la prima impaginazione arriva tardi)
     let lastW = 0;
+    let lastH = 0;
     const ro = new ResizeObserver((entries) => {
       const w = Math.round(entries[0].contentRect.width);
-      if (w === lastW) return;
+      const h = Math.round(entries[0].contentRect.height);
+      if (w === lastW && Math.abs(h - lastH) < 2) return;
       lastW = w;
+      lastH = h;
       measure();
     });
     ro.observe(host);
