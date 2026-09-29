@@ -279,7 +279,14 @@ export function ContentPageView({ page }: { page: ContentPage }) {
               <time dateTime={page.updatedAt} className="text-[var(--text-mid)]">
                 {formatDate(page.updatedAt, page.locale)}
               </time>{" "}
-              · {ui.by}
+              ·{" "}
+              {page.kind === "about" ? (
+                ui.by
+              ) : (
+                <Link href={page.locale === "en" ? "/en/about" : "/it/chi-sono"} className="text-[var(--text-mid)] underline decoration-[var(--line-hi)] underline-offset-4 hover:text-[var(--aqua-200)]">
+                  {ui.by}
+                </Link>
+              )}
             </p>
           ) : null}
         </header>

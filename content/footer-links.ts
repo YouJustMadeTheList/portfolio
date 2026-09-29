@@ -23,7 +23,7 @@ export const footerDirectory: Record<"it" | "en", FooterLinkGroup[]> = {
         { label: "Casi studio", href: "/it/casi-studio" },
         { label: "Guide", href: "/it/guide" },
         { label: "Bandi e incentivi AI", href: "/it/bandi-intelligenza-artificiale" },
-        { label: "Chi sono", href: "/it/chi-sono" },
+        { label: "Chi è Davide De Sanctis", href: "/it/chi-sono" },
       ],
     },
     {
@@ -53,7 +53,7 @@ export const footerDirectory: Record<"it" | "en", FooterLinkGroup[]> = {
       title: "Resources",
       links: [
         { label: "Case studies", href: "/en/case-studies" },
-        { label: "About", href: "/en/about" },
+        { label: "About Davide De Sanctis", href: "/en/about" },
       ],
     },
   ],

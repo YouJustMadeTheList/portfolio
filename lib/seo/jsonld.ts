@@ -18,6 +18,10 @@ export function personNode(locale: PageLocale): Json {
     url: SITE_URL,
     jobTitle: PERSON.jobTitle[locale],
     description: PERSON.description[locale],
+    disambiguatingDescription:
+      locale === "en"
+        ? "Custom AI solutions developer and founder, AI Automation Specialist at Conio, Politecnico di Milano; not to be confused with other people named Davide De Sanctis."
+        : "Sviluppatore di soluzioni AI su misura e fondatore, AI Automation Specialist in Conio, Politecnico di Milano; da non confondere con altre persone di nome Davide De Sanctis.",
     email: `mailto:${PERSON.email}`,
     worksFor: [
       { "@type": "Organization", name: PERSON.worksFor.name, url: PERSON.worksFor.url },

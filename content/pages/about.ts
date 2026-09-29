@@ -14,10 +14,10 @@ export const aboutPages: ContentPage[] = [
     locale: "it",
     path: "/it/chi-sono",
     publishedAt: PAGES_DATE,
-    updatedAt: PAGES_DATE,
-    metaTitle: "Chi sono: Davide De Sanctis, sviluppatore di soluzioni AI",
+    updatedAt: "2026-09-29",
+    metaTitle: "Davide De Sanctis — sviluppatore di soluzioni AI su misura",
     metaDescription:
-      "Davide De Sanctis, 20 anni: sviluppa soluzioni AI su misura per aziende, AI Automation Specialist in Conio, studente di Ingegneria Informatica al Politecnico di Milano, fondatore.",
+      "Chi è Davide De Sanctis: sviluppatore di soluzioni di intelligenza artificiale su misura per aziende, AI Automation Specialist in Conio, studente al Politecnico di Milano, fondatore. Lavora con aziende a Roma, Milano, Pescara, Teramo e Bologna.",
     eyebrow: "Chi sono",
     title: "Davide De Sanctis, sviluppatore di soluzioni AI su misura.",
     emphasis: "soluzioni AI su misura",
@@ -26,6 +26,28 @@ export const aboutPages: ContentPage[] = [
     intro:
       "Sono Davide De Sanctis, ho 20 anni e sviluppo soluzioni di intelligenza artificiale su misura per aziende. Lavoro come AI Automation Specialist in Conio, azienda fintech italiana, studio Ingegneria Informatica al Politecnico di Milano e ho fondato una mia società, da cui nasceranno anche altre startup.",
     sections: [
+      {
+        id: "in-breve",
+        title: "Chi è Davide De Sanctis",
+        blocks: [
+          {
+            type: "table",
+            head: ["Voce", "Dettaglio"],
+            rows: [
+              ["Nome", "Davide De Sanctis"],
+              ["Cosa fa", "Sviluppatore di soluzioni di intelligenza artificiale su misura per aziende"],
+              ["Ruolo", "AI Automation Specialist in [Conio](https://www.conio.com), azienda fintech; fondatore di una propria società"],
+              ["Studi", "Ingegneria Informatica, Politecnico di Milano"],
+              ["Dove lavora", "Roma, Milano, Pescara, Teramo, Bologna e da remoto in tutta Italia"],
+              ["Sito", "[davidedesanctis.com](https://davidedesanctis.com)"],
+            ],
+          },
+          {
+            type: "p",
+            text: "Esistono altre persone con il mio stesso nome. Questa pagina riguarda Davide De Sanctis che sviluppa sistemi di intelligenza artificiale per le aziende, con i profili ufficiali elencati in fondo.",
+          },
+        ],
+      },
       {
         id: "cosa-faccio",
         title: "Cosa faccio",
@@ -104,10 +126,10 @@ export const aboutPages: ContentPage[] = [
     locale: "en",
     path: "/en/about",
     publishedAt: PAGES_DATE,
-    updatedAt: PAGES_DATE,
-    metaTitle: "About Davide De Sanctis, custom AI solutions developer",
+    updatedAt: "2026-09-29",
+    metaTitle: "Davide De Sanctis — custom AI solutions developer",
     metaDescription:
-      "Davide De Sanctis, 20: builds custom AI solutions for businesses, AI Automation Specialist at Conio, Computer Engineering student at Politecnico di Milano, founder.",
+      "Who is Davide De Sanctis: custom artificial intelligence solutions developer for businesses, AI Automation Specialist at Conio, Politecnico di Milano student, founder. Working in Italy.",
     eyebrow: "About",
     title: "Davide De Sanctis, custom AI solutions developer.",
     emphasis: "custom AI solutions",
@@ -116,6 +138,28 @@ export const aboutPages: ContentPage[] = [
     intro:
       "I'm Davide De Sanctis, 20, and I build custom artificial intelligence solutions for businesses. I work as AI Automation Specialist at Conio, an Italian fintech company, study Computer Engineering at Politecnico di Milano, and founded my own company, which will also launch other startups.",
     sections: [
+      {
+        id: "at-a-glance",
+        title: "Who is Davide De Sanctis",
+        blocks: [
+          {
+            type: "table",
+            head: ["Item", "Detail"],
+            rows: [
+              ["Name", "Davide De Sanctis"],
+              ["What he does", "Builds custom artificial intelligence solutions for businesses"],
+              ["Role", "AI Automation Specialist at [Conio](https://www.conio.com), a fintech company; founder of his own company"],
+              ["Studies", "Computer Engineering, Politecnico di Milano"],
+              ["Based", "Italy (Rome, Milan, Pescara, Teramo, Bologna), remote worldwide"],
+              ["Website", "[davidedesanctis.com](https://davidedesanctis.com)"],
+            ],
+          },
+          {
+            type: "p",
+            text: "Other people share this name. This page is about the Davide De Sanctis who builds AI systems for businesses; his official profiles are listed below.",
+          },
+        ],
+      },
       {
         id: "path",
         title: "Path",

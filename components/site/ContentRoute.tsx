@@ -30,6 +30,7 @@ export async function contentMetadata({ params }: Props): Promise<Metadata> {
     locale: page.locale,
     path: page.path,
     title: page.metaTitle,
+    absoluteTitle: page.kind === "about",
     description: page.metaDescription,
     alternates: alternatesOf(page),
     type: page.kind === "guide" || page.kind === "case" || page.kind === "funding" ? "article" : page.kind === "about" ? "profile" : "website",
