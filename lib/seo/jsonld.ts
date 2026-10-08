@@ -2,7 +2,22 @@
    nella pagina e vero: niente recensioni, valutazioni o titoli inventati. */
 
 import type { ContentPage, PageLocale } from "@/lib/seo/pages";
-import { AREAS_SERVED, COMPANY, OG_IMAGE, PERSON, PERSON_SAME_AS, SITE_NAME, SITE_URL, absUrl, known } from "@/lib/seo/site";
+import { CASE_LINKS } from "@/content/case-studies";
+import {
+  AREAS_SERVED,
+  COMPANY,
+  OG_IMAGE,
+  PERSON,
+  PERSON_ALTERNATE_NAMES,
+  PERSON_AWARDS,
+  PERSON_IMAGE,
+  PERSON_PAGE,
+  PERSON_SAME_AS,
+  SITE_NAME,
+  SITE_URL,
+  absUrl,
+  known,
+} from "@/lib/seo/site";
 
 export const PERSON_ID = `${SITE_URL}/#person`;
 export const ORG_ID = `${SITE_URL}/#organization`;
@@ -15,7 +30,12 @@ export function personNode(locale: PageLocale): Json {
     "@type": "Person",
     "@id": PERSON_ID,
     name: PERSON.name,
-    url: SITE_URL,
+    givenName: PERSON.givenName,
+    familyName: PERSON.familyName,
+    alternateName: PERSON_ALTERNATE_NAMES,
+    url: absUrl(PERSON_PAGE[locale]),
+    mainEntityOfPage: absUrl(PERSON_PAGE[locale]),
+    image: { "@type": "ImageObject", url: absUrl(PERSON_IMAGE.url), width: PERSON_IMAGE.width, height: PERSON_IMAGE.height },
     jobTitle: PERSON.jobTitle[locale],
     description: PERSON.description[locale],
     disambiguatingDescription:
@@ -31,6 +51,13 @@ export function personNode(locale: PageLocale): Json {
     knowsAbout: PERSON.knowsAbout,
     knowsLanguage: ["it", "en"],
     nationality: { "@type": "Country", name: "Italia" },
+    award: PERSON_AWARDS[locale],
+    subjectOf: [
+      { "@type": "Article", name: "A different test for every student, and a reason to trust it", url: CASE_LINKS.article },
+      { "@type": "NewsArticle", url: CASE_LINKS.press.certaStampa },
+      { "@type": "NewsArticle", url: CASE_LINKS.press.notizieDAbruzzo },
+      { "@type": "NewsArticle", url: CASE_LINKS.press.abruzzoPopolare },
+    ],
     sameAs: PERSON_SAME_AS,
   };
 }

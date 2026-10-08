@@ -34,6 +34,7 @@ export async function contentMetadata({ params }: Props): Promise<Metadata> {
     description: page.metaDescription,
     alternates: alternatesOf(page),
     type: page.kind === "guide" || page.kind === "case" || page.kind === "funding" ? "article" : page.kind === "about" ? "profile" : "website",
+    portrait: page.kind === "about",
     publishedTime: page.publishedAt,
     modifiedTime: page.updatedAt,
   });

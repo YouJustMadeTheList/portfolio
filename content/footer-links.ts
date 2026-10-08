@@ -9,6 +9,7 @@ export const footerDirectory: Record<"it" | "en", FooterLinkGroup[]> = {
     {
       title: "Servizi",
       links: [
+        { label: "Tutti i servizi", href: "/it/servizi" },
         { label: "Chatbot e RAG sui documenti", href: "/it/servizi/chatbot-rag-documenti-aziendali" },
         { label: "LLM privati e on-premise", href: "/it/servizi/llm-privati-on-premise" },
         { label: "Agenti AI e automazione", href: "/it/servizi/agenti-ai-automazione-processi" },
@@ -41,6 +42,7 @@ export const footerDirectory: Record<"it" | "en", FooterLinkGroup[]> = {
     {
       title: "Services",
       links: [
+        { label: "All services", href: "/en/services" },
         { label: "RAG chatbots on documents", href: "/en/services/rag-chatbot-company-documents" },
         { label: "Private LLMs", href: "/en/services/private-llm-on-premise" },
         { label: "AI agents & automation", href: "/en/services/ai-agents-process-automation" },
