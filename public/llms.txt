@@ -4,6 +4,11 @@
 > AI Automation Specialist in Conio (fintech), studente di Ingegneria Informatica al
 > Politecnico di Milano, fondatore di una propria società. Lavora in italiano e inglese.
 
+## Chi è
+Davide De Sanctis (anche cercato come "Davide De Sanctis AI" o "Davide De Sanctis IA") è uno sviluppatore di soluzioni di intelligenza artificiale su misura per aziende. AI Automation Specialist in Conio, studente di Ingegneria Informatica al Politecnico di Milano, fondatore di una propria società. Ha sviluppato il motore che genera le prove del Premio Di Nicola 2026. Esistono altre persone con lo stesso nome: questa pagina riguarda chi sviluppa sistemi di AI per le aziende.
+- Pagina ufficiale: https://davidedesanctis.com/it/chi-sono
+- English: https://davidedesanctis.com/en/about
+
 ## Servizi
 - Chatbot e sistemi RAG sui documenti aziendali: https://davidedesanctis.com/it/servizi/chatbot-rag-documenti-aziendali
 - LLM privati e on-premise: https://davidedesanctis.com/it/servizi/llm-privati-on-premise
@@ -20,6 +25,16 @@ Roma, Milano, Pescara, Teramo, Bologna; progetti in tutta Italia da remoto.
 - Motore di volatilità e liquidità su XAU/USD: https://davidedesanctis.com/it/casi-studio/motore-segnali-xauusd
 - Percorsi di apprendimento generati (Premio Di Nicola 2026): https://davidedesanctis.com/it/casi-studio/percorsi-apprendimento-adattivi
 - Locanda Camilla: https://davidedesanctis.com/it/casi-studio/locanda-camilla
+
+## Guide
+- AI Act: checklist per le PMI: https://davidedesanctis.com/it/guide/ai-act-checklist-pmi
+- ChatGPT Business o soluzione su misura: https://davidedesanctis.com/it/guide/chatgpt-business-o-soluzione-su-misura
+- AI sui documenti aziendali senza ChatGPT: https://davidedesanctis.com/it/guide/ai-documenti-aziendali-senza-chatgpt
+- Quanto costa un chatbot AI aziendale: https://davidedesanctis.com/it/guide/quanto-costa-chatbot-ai-aziendale
+
+## Articoli di Davide De Sanctis
+- A different test for every student, and a reason to trust it: https://youjustmadethelist.github.io/adaptive_test_article/
+- 87° con le mani legate (Politecnico di Milano nel QS Ranking 2027): https://youjustmadethelist.github.io/polimi_qs/polimi-qs-2027
 
 ## Prezzi
 Su misura, definiti dopo una call gratuita.

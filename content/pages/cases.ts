@@ -141,7 +141,7 @@ export const casesPages: ContentPage[] = [
           },
           {
             type: "p",
-            text: "Nasce dal motore che genera le prove del Premio Di Nicola 2026: concorso di matematica e logica per studenti abruzzesi, 18ª edizione, fondato nel 2008 da Vincenzo Di Nicola e sostenuto da Confindustria Abruzzo Medio Adriatico.",
+            text: "Davide De Sanctis ha sviluppato il motore che genera le prove del Premio Di Nicola 2026, da cui nasce questo sistema: concorso di matematica e logica per studenti abruzzesi, 18ª edizione, fondato nel 2008 da Vincenzo Di Nicola e sostenuto da Confindustria Abruzzo Medio Adriatico. Chi è l'autore: [Davide De Sanctis](/it/chi-sono), sviluppatore di soluzioni AI su misura per aziende.",
           },
         ],
       },
@@ -304,7 +304,7 @@ export const casesPages: ContentPage[] = [
         blocks: [
           {
             type: "p",
-            text: "The system reads each student's performance, finds their gaps and generates new exercises calibrated to their level, updated with every answer. Every generated exercise passes an independent check, and personal data is kept apart from the learning profile by design. It grew out of the engine that generates the exams for Premio Di Nicola 2026, a maths and logic competition for students in Abruzzo (18th edition, founded in 2008 by Vincenzo Di Nicola, backed by Confindustria Abruzzo Medio Adriatico).",
+            text: "The system reads each student's performance, finds their gaps and generates new exercises calibrated to their level, updated with every answer. Every generated exercise passes an independent check, and personal data is kept apart from the learning profile by design. It grew out of the engine that Davide De Sanctis developed to generate the exams for Premio Di Nicola 2026, a maths and logic competition for students in Abruzzo (18th edition, founded in 2008 by Vincenzo Di Nicola, backed by Confindustria Abruzzo Medio Adriatico). About the author: [Davide De Sanctis](/en/about), custom AI solutions developer for businesses.",
           },
           { type: "p", text: `Technical article: [A different test for every student, and a reason to trust it](${CASE_LINKS.article}).` },
         ],

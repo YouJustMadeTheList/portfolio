@@ -25,8 +25,33 @@ export const GITHUB_URL = "https://github.com/YouJustMadeTheList";
 /** Profili ufficiali: sameAs della persona. Solo profili gestiti da Davide. */
 export const PERSON_SAME_AS = [linkedinUrl, GITHUB_URL, instagramUrl];
 
+/** Foto ufficiale (quadrata 800×800): Person.image e og:image di chi-sono/about. */
+export const PERSON_IMAGE = { url: "/davide-de-sanctis.jpg", width: 800, height: 800 };
+
+/** Pagina entità della persona, per lingua: unico riferimento per Person.url e mainEntityOfPage. */
+export const PERSON_PAGE: Record<"it" | "en", string> = { it: "/it/chi-sono", en: "/en/about" };
+
+/** Varianti del nome con cui lo cercano le persone (confermate da Davide). */
+export const PERSON_ALTERNATE_NAMES = ["Davide De Sanctis AI", "Davide De Sanctis IA"];
+
+/** Riconoscimenti già pubblicati in content/pages/about.ts (solo fatti confermati). */
+export const PERSON_AWARDS = {
+  it: [
+    "Olimpiadi dell'Informatica: 1° posto a squadre (Università dell'Aquila), 2023 e 2024",
+    "Romanae Disputationes 2023: menzione d'onore",
+    "Olimpiadi di Problem Solving 2022: menzione d'onore nazionale",
+  ],
+  en: [
+    "Informatics Olympics: 1st place, team (University of L'Aquila), 2023 and 2024",
+    "Romanae Disputationes 2023: honorable mention",
+    "Problem Solving Olympiad 2022: national honorable mention",
+  ],
+};
+
 export const PERSON = {
   name: "Davide De Sanctis",
+  givenName: "Davide",
+  familyName: "De Sanctis",
   jobTitle: {
     it: "Sviluppatore di soluzioni AI su misura · AI Automation Specialist",
     en: "Custom AI solutions developer · AI Automation Specialist",
@@ -60,7 +85,8 @@ export const PERSON = {
  * finché sono "TODO_" l'Organization esce solo con il nome commerciale.
  */
 export const COMPANY = {
-  brandName: "Davide De Sanctis",
+  /** Nome commerciale distinto da quello della persona (evita due entità con lo stesso nome). */
+  brandName: "Davide De Sanctis — Soluzioni AI su misura",
   legalName: "TODO_RAGIONE_SOCIALE_SRL",
   vatID: "TODO_PARTITA_IVA",
   streetAddress: "TODO_INDIRIZZO_SEDE_LEGALE",
