@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocale } from "next-intl";
-import { BlockReveal } from "@/components/fx/TextReveal";
+import { BlockReveal } from "@/components/fx/BlockReveal";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { writingCopy } from "./writingCopy";
 import { writingCards, type WritingCard } from "@/content/about";

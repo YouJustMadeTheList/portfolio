@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { BlockReveal } from "@/components/fx/TextReveal";
+import { BlockReveal } from "@/components/fx/BlockReveal";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 import { networkPeople } from "@/content/network";
 import { SHOW_NETWORK_SECTION } from "@/config/features";

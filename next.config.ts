@@ -13,7 +13,17 @@ const nextConfig: NextConfig = {
   // nel proxy viene sovrascritto da Next sulle pagine, quindi va anche qui.
   async headers() {
     const vary = [{ key: "Vary", value: "User-Agent, Sec-CH-UA-Mobile" }];
+    // Gli asset di /public non hanno hash nel nome: Vercel li serve con
+    // max-age=0 (riverifica a ogni visita). Un mese di cache + revalidate in
+    // background: le visite di ritorno non scaricano né riverificano nulla.
+    const staticAsset = [
+      { key: "Cache-Control", value: "public, max-age=2592000, stale-while-revalidate=604800" },
+    ];
     return [
+      { source: "/dealer/:path*", headers: staticAsset },
+      { source: "/images/:path*", headers: staticAsset },
+      { source: "/icon.png", headers: staticAsset },
+      { source: "/favicon.ico", headers: staticAsset },
       { source: "/:locale(it|en)", headers: vary },
       { source: "/:locale(it|en)/:path*", headers: vary },
     ];

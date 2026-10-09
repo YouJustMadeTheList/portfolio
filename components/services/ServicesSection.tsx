@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { BlockReveal } from "@/components/fx/TextReveal";
+import { BlockReveal } from "@/components/fx/BlockReveal";
 import { PricingCard } from "./PricingCard";
 import { handOffToContact } from "./handoff";
 import { servicePackages, servicesIntro, type Locale } from "@/content/services";

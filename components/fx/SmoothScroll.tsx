@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import Lenis from "lenis";
-import { ensureGsapRegistered, gsap, ScrollTrigger } from "@/lib/animation/gsap";
+import { loadGsap } from "@/lib/animation/loadGsap";
 import { setLenisInstance } from "./scrollTo";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 
@@ -37,7 +36,12 @@ export function SmoothScroll({ children }: { children?: ReactNode }) {
       requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
       cancelIdleCallback?: (id: number) => void;
     };
-    const boot = () => {
+    const boot = async () => {
+      if (cancelled) return;
+      // Lenis e GSAP si scaricano qui, dopo l'idratazione, e non fanno parte
+      // del JS di avvio. Su home sono già in pagina (altri moduli usano GSAP).
+      const [{ default: Lenis }, { ensureGsapRegistered, gsap, ScrollTrigger }] =
+        await Promise.all([import("lenis"), loadGsap()]);
       if (cancelled) return;
       ensureGsapRegistered();
 
@@ -73,9 +77,13 @@ export function SmoothScroll({ children }: { children?: ReactNode }) {
         setLenisInstance(null);
       };
     };
+    const start = () => {
+      // senza Lenis lo scroll resta quello nativo: un errore di rete non rompe nulla
+      boot().catch(() => {});
+    };
     const idleId = w.requestIdleCallback
-      ? w.requestIdleCallback(boot, { timeout: 250 })
-      : window.setTimeout(boot, 60);
+      ? w.requestIdleCallback(start, { timeout: 250 })
+      : window.setTimeout(start, 60);
 
     return () => {
       cancelled = true;

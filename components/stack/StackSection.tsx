@@ -4,7 +4,7 @@ import { useLocale } from "next-intl";
 import { Container } from "@/components/ui/Container";
 import { SectionHeader, parseEmphasis } from "@/components/ui/SectionHeader";
 import { useIsMobileVariant } from "@/components/variant/VariantProvider";
-import { BlockReveal } from "@/components/fx/TextReveal";
+import { BlockReveal } from "@/components/fx/BlockReveal";
 import { Tactile } from "@/components/ui/Tactile";
 import { stackIntro, stackItems, type Locale, type StackItem } from "@/content/stack";
 

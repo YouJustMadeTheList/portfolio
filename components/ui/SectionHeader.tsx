@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { TextReveal } from "@/components/fx/TextReveal";
+import { Em, parseEmphasis } from "./emphasis";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -28,26 +29,7 @@ import { cn } from "@/lib/utils/cn";
  * `className="mx-auto text-center"` continuano a funzionare identiche).
  */
 
-/** Enfasi serif-italic aqua. Usare dentro un titolo, su UNA sola frase. */
-export function Em({ children }: { children: ReactNode }) {
-  return <span className="serif-accent">{children}</span>;
-}
-
-/** Converte "testo ⟨enfasi⟩ testo" (o *enfasi*) in nodi con <Em>. */
-export function parseEmphasis(text: string): ReactNode {
-  const parts = text.split(/(⟨[^⟩]+⟩|\*[^*]+\*)/g).filter(Boolean);
-  if (parts.length === 1) return text;
-  return parts.map((part, i) => {
-    const isEm =
-      (part.startsWith("⟨") && part.endsWith("⟩")) ||
-      (part.startsWith("*") && part.endsWith("*") && part.length > 2);
-    return isEm ? (
-      <Em key={i}>{part.slice(1, -1)}</Em>
-    ) : (
-      <span key={i}>{part}</span>
-    );
-  });
-}
+export { Em, parseEmphasis };
 
 export interface SectionHeaderProps {
   eyebrow?: string;

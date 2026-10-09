@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Container } from "@/components/ui/Container";
-import { BlockReveal } from "@/components/fx/TextReveal";
+import { BlockReveal } from "@/components/fx/BlockReveal";
 import { navSections } from "@/content/nav";
 import { NavLink } from "@/components/nav/NavLink";
 import { BackToTopButton } from "./BackToTopButton";

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { Tactile } from "@/components/ui/Tactile";
-import { parseEmphasis } from "@/components/ui/SectionHeader";
+import { parseEmphasis } from "@/components/ui/emphasis";
 import { usePrefersReducedMotion } from "@/lib/hooks/usePrefersReducedMotion";
 
 export type NotFoundCopy = {
