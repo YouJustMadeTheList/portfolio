@@ -7,11 +7,12 @@ export const servicesIt: ContentPage[] = [
   {
     ...base,
     key: "svc-rag",
+    updatedAt: "2026-10-09",
     path: "/it/servizi/chatbot-rag-documenti-aziendali",
     serviceType: "Sviluppo chatbot e sistemi RAG sui documenti aziendali",
-    metaTitle: "Chatbot sui documenti aziendali (RAG) su misura",
+    metaTitle: "Chatbot per documenti aziendali con RAG, su misura",
     metaDescription:
-      "Sviluppo chatbot e assistenti che rispondono sui documenti della tua azienda con le fonti citate: RAG su misura, dati sotto controllo, GDPR. Preventivo dopo una call gratuita.",
+      "Chatbot AI sui documenti e sulla documentazione tecnica della tua azienda, con fonti citate. RAG su misura, dati sotto controllo, GDPR. Call gratuita.",
     eyebrow: "Servizi · RAG",
     title: "Un assistente che risponde sui tuoi documenti, citando le fonti.",
     emphasis: "citando le fonti",
@@ -37,6 +38,30 @@ export const servicesIt: ContentPage[] = [
         ],
       },
       {
+        id: "casi-d-uso",
+        title: "Documentazione tecnica, manuali e procedure: i casi d'uso",
+        blocks: [
+          {
+            type: "p",
+            text: "Un chatbot sui documenti aziendali è utile dove la conoscenza è scritta ma difficile da trovare. I casi più comuni:",
+          },
+          {
+            type: "list",
+            items: [
+              "**Documentazione tecnica e manuali**: tecnici e assistenza ottengono la risposta con il riferimento alla pagina o alla sezione, invece di cercare nei PDF;",
+              "**Procedure interne e policy**: HR, qualità e amministrazione rispondono alle domande ricorrenti del personale con la versione corretta del documento;",
+              "**Contratti e offerte**: ricerca di clausole, condizioni e prezzi in archivi di centinaia di file;",
+              "**Supporto clienti**: bozze di risposta basate su manuali e storico dei ticket, che una persona rivede prima dell'invio;",
+              "**Onboarding**: chi entra in azienda fa domande su prodotti e processi e ottiene risposte con le fonti.",
+            ],
+          },
+          {
+            type: "p",
+            text: "Ogni caso si valuta con domande reali del tuo team prima di costruire il sistema completo.",
+          },
+        ],
+      },
+      {
         id: "come-funziona",
         title: "Come funziona un sistema RAG fatto bene",
         blocks: [
@@ -50,6 +75,16 @@ export const servicesIt: ContentPage[] = [
               "**Permessi.** Ogni utente vede solo i documenti a cui ha accesso anche fuori dall'assistente.",
               "**Valutazione.** Un insieme di domande di prova con risposte attese misura la qualità prima di ogni rilascio, così i miglioramenti si vedono in numeri e non in impressioni.",
             ],
+          },
+        ],
+      },
+      {
+        id: "rag-o-fine-tuning",
+        title: "RAG o fine-tuning: cosa scegliere",
+        blocks: [
+          {
+            type: "p",
+            text: "Per far rispondere un modello sui documenti aziendali si usa quasi sempre il RAG, non il fine-tuning. Il RAG legge i documenti al momento della domanda: se un manuale cambia, basta aggiornare l'indice, e ogni risposta può citare la fonte. Il fine-tuning modifica il comportamento del modello (stile, formato, compiti specifici) ma non è un modo affidabile per fargli \"memorizzare\" documenti che cambiano. Le due tecniche si possono combinare, ma si parte dal RAG.",
           },
         ],
       },
@@ -70,6 +105,25 @@ export const servicesIt: ContentPage[] = [
           {
             type: "p",
             text: "Ho costruito un livello di interrogazione in linguaggio naturale su oltre 2 milioni di documenti distribuiti su decine di indici, con un catalogo di oltre 2.000 campi in un database vettoriale per il RAG. Il caso completo è in [Analytics aumentata da IA su scala documentale](/it/casi-studio/analytics-ai-documenti).",
+          },
+        ],
+      },
+      {
+        id: "per-iniziare",
+        title: "Cosa serve per iniziare",
+        blocks: [
+          {
+            type: "list",
+            items: [
+              "un insieme di documenti reali, anche solo un sottoinsieme (cartella, wiki, archivio di manuali);",
+              "una ventina di domande a cui oggi il tuo team risponde a mano, con la risposta che consideri corretta: servono a misurare la qualità;",
+              "una persona che conosca i documenti e possa dire se le risposte sono giuste;",
+              "l'indicazione di chi può vedere cosa, se i documenti hanno livelli di accesso diversi.",
+            ],
+          },
+          {
+            type: "p",
+            text: "Con questi elementi la call gratuita serve a stabilire se un assistente RAG ha senso, quanto è grande il progetto e da dove partire.",
           },
         ],
       },
@@ -94,6 +148,22 @@ export const servicesIt: ContentPage[] = [
       {
         q: "Quanto tempo serve per un primo prototipo?",
         a: "Dipende da quanti e quali documenti, ma un prototipo su un sottoinsieme reale dei tuoi dati è l'obiettivo delle prime settimane: serve a misurare la qualità prima di investire nella versione completa.",
+      },
+      {
+        q: "Quali documenti può leggere un chatbot RAG?",
+        a: "I formati più comuni in azienda: PDF, documenti Word, fogli di calcolo, pagine web ed esportazioni di ticket o database. Quelli scansionati o pieni di tabelle e immagini richiedono più preparazione, ed è la voce che incide di più sul lavoro.",
+      },
+      {
+        q: "RAG o fine-tuning: quale serve per i documenti aziendali?",
+        a: "Quasi sempre il RAG: legge i documenti al momento della domanda, si aggiorna cambiando l'indice e cita le fonti. Il fine-tuning non è un modo affidabile per fare imparare al modello documenti che cambiano.",
+      },
+      {
+        q: "Il chatbot può funzionare senza mandare i dati a servizi esterni?",
+        a: "Sì, con un modello che gira su server tuoi o in un cloud europeo scelto da te. Si valuta caso per caso: vedi [LLM privati e on-premise](/it/servizi/llm-privati-on-premise).",
+      },
+      {
+        q: "Quanto costa un chatbot sui documenti aziendali?",
+        a: "Dipende da quantità e formato dei documenti, dalle integrazioni e da dove gira il modello. Le voci di costo e come stimare la spesa mensile sono nella guida [Quanto costa un chatbot AI aziendale](/it/guide/quanto-costa-chatbot-ai-aziendale).",
       },
       {
         q: "Funziona con documenti in italiano?",
