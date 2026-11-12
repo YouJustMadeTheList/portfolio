@@ -39,6 +39,9 @@ const Canvas = dynamic(
   { ssr: false, loading: () => null },
 );
 
+/** Quanto aspettare l'apertura dell'hero (la rete si forma in ~5s) prima di avviare il fondo animato. */
+const HERO_INTRO_MS = 4500;
+
 /**
  * Fallback statico: stesso schema cromatico, zero costo, mai nero piatto.
  *
@@ -58,20 +61,44 @@ export function BackgroundShader({ opacity = 0.5, particles }: BackgroundShaderP
   const reduced = usePrefersReducedMotion();
   const [webgl, setWebgl] = useState<boolean | null>(null);
   const [visible, setVisible] = useState(true);
+  const [settled, setSettled] = useState(false);
 
   useEffect(() => {
-    // sondaggio WebGL rimandato di un frame: non blocca il primo paint e non
-    // innesca un render a cascata dentro il corpo dell'effetto
+    // Sonda e canvas partono DOPO l'apertura dell'hero, quando c'è: l'hero
+    // compila il suo shader e anima il titolo nei primi secondi, e un secondo
+    // contesto WebGL a tutto schermo che compila nello stesso momento porta i
+    // primi frame a scattare. Il fondo statico c'è da subito; il campo
+    // animato arriva a rete già formata. Senza hero (pagine di testo) parte
+    // subito, come prima.
     let alive = true;
-    const probe = window.requestAnimationFrame(() => {
-      hasRichWebGLAsync().then((ok) => {
-        if (alive) setWebgl(ok);
+    let probe = 0;
+    let idle = 0;
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const run = () => {
+      probe = window.requestAnimationFrame(() => {
+        hasRichWebGLAsync().then((ok) => {
+          if (alive) setWebgl(ok);
+        });
       });
-    });
+    };
+    const hasHero = !!document.getElementById("hero");
+    const startId = window.setTimeout(
+      () => {
+        if (!alive) return;
+        if (w.requestIdleCallback) idle = w.requestIdleCallback(run, { timeout: 1500 });
+        else run();
+      },
+      hasHero ? HERO_INTRO_MS : 0,
+    );
     const onVis = () => setVisible(!document.hidden);
     document.addEventListener("visibilitychange", onVis);
     return () => {
       alive = false;
+      window.clearTimeout(startId);
+      if (idle && w.cancelIdleCallback) w.cancelIdleCallback(idle);
       window.cancelAnimationFrame(probe);
       document.removeEventListener("visibilitychange", onVis);
     };
@@ -83,6 +110,14 @@ export function BackgroundShader({ opacity = 0.5, particles }: BackgroundShaderP
      ricompilare due shader e ricaricare i buffer, un gruppo di frame persi
      proprio nell'istante in cui l'utente torna a guardare la pagina. */
   const live = webgl === true && !reduced;
+
+  // il fondo statico resta sotto finché il canvas non è sfumato del tutto:
+  // nessun istante senza punti, anche se il canvas compare a hero avviata.
+  useEffect(() => {
+    if (!live) return;
+    const t = window.setTimeout(() => setSettled(true), 1400);
+    return () => window.clearTimeout(t);
+  }, [live]);
 
   return (
     <div
@@ -96,10 +131,12 @@ export function BackgroundShader({ opacity = 0.5, particles }: BackgroundShaderP
         contain: "layout paint style",
       }}
     >
-      {live ? (
-        <Canvas opacity={opacity} paused={!visible} particles={particles} />
-      ) : (
-        <StaticFallback />
+      {(!live || !settled) && <StaticFallback />}
+      {live && (
+        <div style={{ position: "absolute", inset: 0, animation: "bg-canvas-in 1.2s ease-out both" }}>
+          <style>{`@keyframes bg-canvas-in{from{opacity:0}to{opacity:1}}`}</style>
+          <Canvas opacity={opacity} paused={!visible} particles={particles} />
+        </div>
       )}
     </div>
   );
