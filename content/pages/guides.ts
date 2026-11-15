@@ -287,6 +287,7 @@ export const guidesPages: ContentPage[] = [
   {
     ...base,
     key: "guide-chatgpt-business",
+    updatedAt: "2026-10-09",
     path: "/it/guide/chatgpt-business-o-soluzione-su-misura",
     metaTitle: "ChatGPT Business o soluzione AI su misura: quando conviene",
     metaDescription:
@@ -323,6 +324,23 @@ export const guidesPages: ContentPage[] = [
         ],
       },
       {
+        id: "come-decidere",
+        title: "Come decidere in cinque domande",
+        blocks: [
+          {
+            type: "list",
+            ordered: true,
+            items: [
+              "**Chi deve usarla?** Se sono molte persone con bisogni generici (scrivere, riassumere, tradurre), un piano pronto è il punto di partenza.",
+              "**Su quali dati deve lavorare?** Se deve rispondere sui documenti dell'azienda con permessi per utente e fonti citate, serve un sistema costruito su quei dati.",
+              "**Deve fare un lavoro o solo rispondere?** Un'attività che parte da sola (leggere fatture, aggiornare il CRM) richiede un'automazione, non una chat.",
+              "**Dove possono stare i dati?** Se non possono uscire dall'azienda o dall'UE, si valutano un cloud europeo o un modello privato.",
+              "**Quante richieste al mese?** A volumi alti il costo per utente di un piano pronto può superare quello di un sistema dedicato: lo si verifica con una stima, come nella guida ai [costi di un chatbot AI aziendale](/it/guide/quanto-costa-chatbot-ai-aziendale).",
+            ],
+          },
+        ],
+      },
+      {
         id: "quando",
         title: "Quando conviene la soluzione su misura",
         blocks: [
@@ -344,6 +362,18 @@ export const guidesPages: ContentPage[] = [
       },
     ],
     faq: [
+      {
+        q: "Qual è la differenza tra ChatGPT Business e una soluzione AI su misura?",
+        a: "ChatGPT Business è un assistente generico pronto, pagato per utente. Una soluzione su misura è costruita attorno a un processo: lavora sui tuoi documenti e sistemi, con regole, permessi e costi decisi da te, e può funzionare anche senza una persona davanti.",
+      },
+      {
+        q: "Posso usare ChatGPT Business con i documenti della mia azienda?",
+        a: "Si possono caricare file e fare domande, ma permessi per singolo utente, fonti citate e collegamento ai sistemi aziendali dipendono dalle funzioni del fornitore. Per un controllo preciso su documenti e accessi si usa un sistema [RAG](/it/servizi/chatbot-rag-documenti-aziendali). Le condizioni sull'uso dei dati vanno verificate sul sito del fornitore.",
+      },
+      {
+        q: "Meglio partire da un piano pronto o da un progetto su misura?",
+        a: "Spesso conviene partire dal piano pronto per tutti e costruire su misura solo i processi dove l'AI fa risparmiare più ore. Una call gratuita serve a capire quali sono.",
+      },
       {
         q: "ChatGPT Business basta per una PMI?",
         a: "Per l'uso individuale dei dipendenti spesso sì. Non basta quando serve automatizzare un processo, integrare i sistemi aziendali o controllare in dettaglio dati e comportamento.",
