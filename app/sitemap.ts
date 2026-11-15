@@ -8,9 +8,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const langs = (m: Partial<Record<"it" | "en", string>>) =>
     Object.fromEntries(Object.entries(m).map(([k, v]) => [k, absUrl(v as string)]));
 
+  /* Home: ultima modifica reale = la pagina di contenuto aggiornata più di recente. */
+  const homeModified = contentPages.reduce((max, p) => (p.updatedAt > max ? p.updatedAt : max), PAGES_DATE);
+
   const fixed: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/it`, lastModified: PAGES_DATE, changeFrequency: "monthly", priority: 1, alternates: { languages: langs({ it: "/it", en: "/en" }) } },
-    { url: `${SITE_URL}/en`, lastModified: PAGES_DATE, changeFrequency: "monthly", priority: 0.8, alternates: { languages: langs({ it: "/it", en: "/en" }) } },
+    { url: `${SITE_URL}/it`, lastModified: homeModified, changeFrequency: "monthly", priority: 1, alternates: { languages: langs({ it: "/it", en: "/en" }) } },
+    { url: `${SITE_URL}/en`, lastModified: homeModified, changeFrequency: "monthly", priority: 0.8, alternates: { languages: langs({ it: "/it", en: "/en" }) } },
     ...(["privacy", "cookie"] as const).flatMap((s) =>
       (["it", "en"] as const).map((l) => ({
         url: `${SITE_URL}/${l}/${s}`,

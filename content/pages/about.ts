@@ -31,6 +31,10 @@ export const aboutPages: ContentPage[] = [
         title: "Chi è Davide De Sanctis",
         blocks: [
           {
+            type: "p",
+            text: "**Davide De Sanctis** è uno sviluppatore di soluzioni di intelligenza artificiale su misura per aziende: assistenti sui documenti aziendali (RAG), agenti AI e automazione dei processi, LLM privati, sistemi dati per fintech ed edtech. È AI Automation Specialist in [Conio](https://www.conio.com), studia Ingegneria Informatica al Politecnico di Milano ed è fondatore di una propria società. Chi cerca «Davide De Sanctis AI» o «Davide De Sanctis IA» cerca di solito questo: lo sviluppatore che costruisce sistemi di intelligenza artificiale per le aziende, con clienti a Roma, Milano, Pescara, Teramo e Bologna e da remoto in tutta Italia.",
+          },
+          {
             type: "table",
             head: ["Voce", "Dettaglio"],
             rows: [
@@ -55,6 +59,16 @@ export const aboutPages: ContentPage[] = [
           {
             type: "p",
             text: "Tengo insieme tre cose che di solito stanno in persone diverse: architettura del software, intelligenza artificiale e gestione dei dati. Costruisco [assistenti sui documenti aziendali](/it/servizi/chatbot-rag-documenti-aziendali), [agenti che automatizzano processi](/it/servizi/agenti-ai-automazione-processi), sistemi dati per il [fintech](/it/servizi/ai-per-fintech) e piattaforme di [apprendimento adattivo](/it/servizi/ai-per-edtech).",
+          },
+        ],
+      },
+      {
+        id: "premio-di-nicola",
+        title: "Davide De Sanctis e il Premio Di Nicola",
+        blocks: [
+          {
+            type: "p",
+            text: "Davide De Sanctis ha sviluppato il motore che genera le prove del Premio Di Nicola 2026, concorso di matematica e logica per studenti abruzzesi giunto alla 18ª edizione e fondato nel 2008 da Vincenzo Di Nicola: esercizi diversi per ogni studente, verificati uno per uno prima di essere proposti. Il progetto è raccontato nel [caso studio sui percorsi di apprendimento adattivi](/it/casi-studio/percorsi-apprendimento-adattivi) ed è stato citato dalla stampa locale.",
           },
         ],
       },
@@ -143,6 +157,10 @@ export const aboutPages: ContentPage[] = [
         title: "Who is Davide De Sanctis",
         blocks: [
           {
+            type: "p",
+            text: "**Davide De Sanctis** is a developer of custom artificial intelligence solutions for businesses: assistants on company documents (RAG), AI agents and process automation, private LLMs, data systems for fintech and edtech. He is AI Automation Specialist at [Conio](https://www.conio.com), studies Computer Engineering at Politecnico di Milano and is the founder of his own company. People searching for \"Davide De Sanctis AI\" are usually looking for this: the developer who builds AI systems for businesses, with clients in Rome, Milan, Pescara, Teramo and Bologna and remotely across Italy.",
+          },
+          {
             type: "table",
             head: ["Item", "Detail"],
             rows: [
@@ -157,6 +175,16 @@ export const aboutPages: ContentPage[] = [
           {
             type: "p",
             text: "Other people share this name. This page is about the Davide De Sanctis who builds AI systems for businesses; his official profiles are listed below.",
+          },
+        ],
+      },
+      {
+        id: "premio-di-nicola",
+        title: "Davide De Sanctis and the Premio Di Nicola",
+        blocks: [
+          {
+            type: "p",
+            text: "Davide De Sanctis developed the engine that generates the exams of the Premio Di Nicola 2026, a maths and logic competition for students in Abruzzo, now in its 18th edition and founded in 2008 by Vincenzo Di Nicola: different exercises for every student, each verified before it is shown. The project is described in the [adaptive learning paths case study](/en/case-studies/adaptive-learning-paths) and was covered by the local press.",
           },
         ],
       },

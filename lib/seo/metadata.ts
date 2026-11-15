@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { PageLocale } from "@/lib/seo/pages";
-import { OG_IMAGE, SITE_NAME, SITE_URL } from "@/lib/seo/site";
+import { OG_IMAGE, PERSON, PERSON_IMAGE, SITE_NAME, SITE_URL } from "@/lib/seo/site";
 
 /**
  * Metadata di una pagina: canonical, hreflang (it/en + x-default), Open Graph
@@ -17,12 +17,19 @@ export function pageMetadata(opts: {
   absoluteTitle?: boolean;
   publishedTime?: string;
   modifiedTime?: string;
+  /** Pagina entità della persona: ritratto come immagine social + campi OG profile. */
+  portrait?: boolean;
 }): Metadata {
   const languages: Record<string, string> = {};
   const alts = opts.alternates ?? { [opts.locale]: opts.path };
   if (alts.it) languages.it = alts.it;
   if (alts.en) languages.en = alts.en;
   languages["x-default"] = alts.it ?? alts.en ?? opts.path;
+
+  const img = opts.portrait
+    ? { url: PERSON_IMAGE.url, width: PERSON_IMAGE.width, height: PERSON_IMAGE.height }
+    : { url: OG_IMAGE.url, width: OG_IMAGE.width, height: OG_IMAGE.height };
+  const profileFields = opts.type === "profile" ? { firstName: PERSON.givenName, lastName: PERSON.familyName } : {};
 
   const ogTitle = opts.absoluteTitle ? opts.title : `${opts.title} — ${SITE_NAME}`;
   return {
@@ -38,14 +45,15 @@ export function pageMetadata(opts: {
       description: opts.description,
       locale: opts.locale === "en" ? "en_US" : "it_IT",
       alternateLocale: opts.locale === "en" ? ["it_IT"] : ["en_US"],
-      images: [{ url: OG_IMAGE.url, width: OG_IMAGE.width, height: OG_IMAGE.height, alt: SITE_NAME }],
+      images: [{ ...img, alt: SITE_NAME }],
+      ...profileFields,
       ...(opts.type === "article" ? { publishedTime: opts.publishedTime, modifiedTime: opts.modifiedTime, authors: [SITE_URL] } : {}),
     },
     twitter: {
-      card: "summary_large_image",
+      card: opts.portrait ? "summary" : "summary_large_image",
       title: ogTitle,
       description: opts.description,
-      images: [OG_IMAGE.url],
+      images: [img.url],
     },
   };
 }
